@@ -76,8 +76,8 @@ export function CommuteForm({ onSubmit, isLoading }: CommuteFormProps) {
         <h2 className="text-lg font-bold text-white">Plan Your Commute</h2>
         <p className="text-xs text-slate-500 mt-1">Delhi corridor — AI-optimized routing</p>
       </div>
-      <Tabs defaultValue="form" className="p-6">
-        <TabsList className="mb-6 w-full bg-black/30 border border-white/5 rounded-xl p-1">
+      <Tabs defaultValue="form" className="p-5">
+        <TabsList className="mb-5 w-full bg-black/30 border border-white/5 rounded-xl p-1 flex">
           <TabsTrigger value="form" className="flex-1 rounded-lg text-xs font-semibold data-[state=active]:bg-blue-600 data-[state=active]:text-white text-slate-500">
             Form Input
           </TabsTrigger>

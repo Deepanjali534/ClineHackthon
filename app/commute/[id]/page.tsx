@@ -11,6 +11,7 @@ import { SourceBadge } from '@/components/shared/SourceBadge';
 import { DevActivityPanel } from '@/components/shared/DevActivityPanel';
 import { useSSE } from '@/lib/hooks/useSSE';
 import { mockPlan, mockBackupPlan } from '@/lib/mock/mockPlan';
+import { RouteMap } from '@/components/shared/RouteMap';
 
 export default function PlanPage() {
   const params = useParams();
@@ -61,6 +62,7 @@ export default function PlanPage() {
         onNavigate={() => alert('Navigation — backend integration pending')}
         onSave={() => alert('Saved!')}
         onViewBackup={plan.backup ? () => setShowBackup(s => !s) : undefined} />
+      <RouteMap plan={plan} />
       {showBackup && plan.backup && (
         <div>
           <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-3">Backup Plan</p>

@@ -52,7 +52,7 @@ export function TripForm({ onSubmit, isLoading }: Props) {
               return (
                 <button key={i.id} type="button" onClick={() => toggle(i.id)}
                   className={`px-3 py-1.5 rounded-full border text-xs font-semibold transition-all ${i.color} ${sel ? 'ring-1 ring-current' : ''}`}>
-                  {sel ? '&#10003; ' : ''}{i.label}
+                  {sel ? '✓ ' : ''}{i.label}
                 </button>
               );
             })}
@@ -62,7 +62,7 @@ export function TripForm({ onSubmit, isLoading }: Props) {
         <button disabled={!valid || isLoading}
           onClick={() => valid && onSubmit({ destination, startDate, endDate, totalBudgetINR: budget, interests, optimizationMode: mode })}
           className="w-full h-14 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-500 text-white font-bold text-sm hover:shadow-[0_0_30px_rgba(99,102,241,0.5)] transition-all disabled:opacity-40 disabled:cursor-not-allowed">
-          {isLoading ? 'Planning...' : 'Plan My Trip &#8594;'}
+          {isLoading ? 'Planning...' : 'Plan My Trip →'}
         </button>
       </div>
     </div>
