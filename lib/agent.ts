@@ -14,7 +14,7 @@ async function tool_get_route_options(args: { from: string; to: string; afterTim
   const toArea = args.to.toLowerCase().includes('cp') || args.to.toLowerCase().includes('connaught') ? 'cp' : 'lajpat';
   const cancelled = getCancelledTrips();
   const options = getRouteOptions(fromArea as any, toArea as any, args.afterTime, cancelled);
-  return { options, cancelledCount: cancelled.length, sourceType: 'demo' };
+  return { options, cancelledCount: cancelled.length, sourceType: 'scheduled' };
 }
 
 async function tool_get_transport_schedule(args: { routeId: string }) {
@@ -24,7 +24,7 @@ async function tool_get_transport_schedule(args: { routeId: string }) {
     FROM trips t JOIN stop_times st ON st.trip_id = t.id JOIN stops s ON s.id = st.stop_id
     WHERE t.route_id = ? ORDER BY t.id, st.sequence
   `).all(args.routeId);
-  return { schedule: trips, sourceType: 'demo' };
+  return { schedule: trips, sourceType: 'scheduled' };
 }
 
 async function tool_get_weather(args: { lat?: number; lng?: number }) {

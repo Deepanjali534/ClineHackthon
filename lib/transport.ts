@@ -88,7 +88,7 @@ export function getRouteOptions(
       walkToStopMeters: walkToStop,
       walkFromStopMeters: walkFromStop,
       transfers: 0,
-      sourceType: 'demo',
+      sourceType: 'scheduled',
     });
   }
 

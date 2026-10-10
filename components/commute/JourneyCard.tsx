@@ -78,12 +78,17 @@ export function JourneyCard({ plan, budget, maxWalk, isHighlighted, onNavigate, 
           </p>
         </div>
 
-        {/* Data source */}
-        <div className="flex flex-wrap gap-2 items-center">
-          <span className="text-xs text-slate-600">Data:</span>
-          <SourceBadge type="demo" />
-          <SourceBadge type="scheduled" />
-        </div>
+        {/* Data source - computed from actual step data */}
+        {(() => {
+          const allSteps = [...plan.outbound.steps, ...plan.returnLeg.steps];
+          const types = Array.from(new Set(allSteps.map(s => s.sourceType)));
+          return types.length > 0 ? (
+            <div className="flex flex-wrap gap-2 items-center">
+              <span className="text-xs text-slate-600">Data:</span>
+              {types.map(t => <SourceBadge key={t} type={t} />)}
+            </div>
+          ) : null;
+        })()} 
 
         {/* Actions */}
         <div className="flex gap-3 pt-2">

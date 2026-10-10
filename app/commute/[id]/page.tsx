@@ -78,8 +78,8 @@ export default function PlanPage() {
         <LiveMonitoringBanner lastEvent={lastEvent} onReplan={reason => triggerReplan(id, reason).catch(() => {})} />
       )}
       <JourneyCard plan={plan} budget={120} maxWalk={500} isHighlighted
-        onNavigate={() => alert('Navigation - backend integration pending')}
-        onSave={() => alert('Saved!')}
+        onNavigate={() => { window.open(`https://maps.google.com?q=Connaught+Place,Delhi`, '_blank'); }}
+        onSave={() => { navigator.clipboard?.writeText(window.location.href).then(() => {}); }}
         onViewBackup={plan.backup ? () => setShowBackup(s => !s) : undefined} />
       <RouteMap plan={plan} />
       {showBackup && plan.backup && (

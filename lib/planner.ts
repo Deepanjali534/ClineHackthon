@@ -50,7 +50,7 @@ function buildLeg(opt: RouteOption, isReturn: boolean): JourneyLeg {
       durationMins: opt.durationMins,
       costINR: opt.fareINR,
       serviceId: opt.tripId,
-      sourceType: 'demo',
+      sourceType: 'scheduled',
     },
     {
       type: 'walk',
