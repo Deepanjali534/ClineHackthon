@@ -21,7 +21,10 @@ export async function createPlan(request: CommuteRequest): Promise<{ id: string 
 
 export async function getPlan(id: string): Promise<JourneyPlan> {
   const res = await fetch(`${BASE}/api/plan/${id}`);
-  return handleResponse<JourneyPlan>(res);
+  // Backend returns { plan: JourneyPlan, request, versions, ... }
+  // We need to extract the plan field
+  const data = await handleResponse<{ plan: JourneyPlan } & JourneyPlan>(res);
+  return data.plan ?? data;
 }
 
 export async function submitNotice(rawText: string): Promise<ServiceNotice> {

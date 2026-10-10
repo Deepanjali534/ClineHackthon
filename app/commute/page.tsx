@@ -5,7 +5,6 @@ import { CommuteForm } from '@/components/commute/CommuteForm';
 import { CommuteRequest } from '@/lib/types';
 import { createPlan } from '@/lib/api';
 import { mockPlan } from '@/lib/mock/mockPlan';
-import { SourceBadge } from '@/components/shared/SourceBadge';
 export default function CommutePage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -14,11 +13,7 @@ export default function CommutePage() {
       <div className="grid grid-cols-12 gap-6">
         {/* Left: Form */}
         <div className="col-span-5 space-y-4 min-w-0">
-          <div className="flex items-center gap-2 mb-2">
-            <SourceBadge type="demo" />
-            <span className="text-xs text-slate-500">Backend not connected — using demo data</span>
-          </div>
-          <CommuteForm isLoading={loading} onSubmit={async (req: CommuteRequest) => {
+<CommuteForm isLoading={loading} onSubmit={async (req: CommuteRequest) => {
             setLoading(true);
             try { const { id } = await createPlan(req); router.push(`/commute/thinking/${id}`); }
             catch { router.push(`/commute/thinking/${mockPlan.id}`); }

@@ -21,6 +21,7 @@ const MOCK_EVENTS: SSEEvent[] = [
 ];
 
 const toolNames: Record<string, string> = {
+  progress: 'Working...',
   get_service_notices: 'Checking service notices',
   get_route_options: 'Fetching departures',
   get_weather: 'Getting weather data',

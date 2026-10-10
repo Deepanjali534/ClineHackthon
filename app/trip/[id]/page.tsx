@@ -16,7 +16,25 @@ export default function TripDetailPage() {
   const [error, setError] = useState('');
   useEffect(() => {
     if (isDemo) return;
-    getTrip(id).then(setPlan).catch(e => setError(e.message)).finally(() => setLoading(false));
+    let cancelled = false;
+    const poll = async () => {
+      for (let i = 0; i < 60; i++) {
+        if (cancelled) return;
+        try {
+          const res = await fetch(`/api/trip/${id}`);
+          if (!res.ok && res.status === 404) { setError('Trip not found'); setLoading(false); return; }
+          if (res.status === 504) { await new Promise(r => setTimeout(r, 2000)); continue; }
+          const data = await res.json();
+          if (data && data.id) { setPlan(data); setLoading(false); return; }
+          await new Promise(r => setTimeout(r, 1500));
+        } catch (e: any) {
+          setError(e.message); setLoading(false); return;
+        }
+      }
+      setError('Timed out waiting for trip plan.'); setLoading(false);
+    };
+    poll();
+    return () => { cancelled = true; };
   }, [id, isDemo]);
   if (loading) return <LoadingSpinner message="Loading your itinerary..." />;
   if (error) return <ErrorState message={error} onRetry={() => window.location.reload()} />;
