@@ -1,7 +1,7 @@
 // Cline SDK Travel Agent with 6 custom tools
 // Falls back to direct planner if SDK unavailable
 import { CommuteRequest, JourneyPlan, SSEEvent } from './types';
-import { getRouteOptions, getCancelledTrips } from './transport';
+import { getRouteOptions, getCancelledTrips, resolveArea } from './transport';
 import { getWeather, getWeatherForJourney } from './weather';
 import { planJourney } from './planner';
 import { getDb } from './db';
@@ -10,10 +10,8 @@ export type SSEEmitter = (event: SSEEvent) => void;
 
 // ─── Tool Handlers ───────────────────────────────────────────────
 async function tool_get_route_options(args: { from: string; to: string; afterTime: string }) {
-  const fromArea = args.from.toLowerCase().includes('lajpat') ? 'lajpat' : 'cp';
-  const toArea = args.to.toLowerCase().includes('cp') || args.to.toLowerCase().includes('connaught') ? 'cp' : 'lajpat';
   const cancelled = getCancelledTrips();
-  const options = getRouteOptions(fromArea as any, toArea as any, args.afterTime, cancelled);
+  const options = getRouteOptions(args.from, args.to, args.afterTime, cancelled);
   return { options, cancelledCount: cancelled.length, sourceType: 'scheduled' };
 }
 
@@ -103,7 +101,7 @@ async function runWithClaude(req: CommuteRequest, planId: string, runId: string,
   ];
 
   const systemPrompt = `You are a Delhi travel planning agent. Plan the optimal commute for the user using the available tools. 
-User request: From Lajpat Nagar to Connaught Place.
+User request: From ${req.origin} to ${req.destination}.
 Deadline: ${req.arrivalDeadline}, Return after: ${req.returnReadyTime}, Budget: \u20b9${req.dailyBudgetINR}, Max walk: ${req.maxWalkMeters}m, Mode: ${req.optimizationMode}.
 Use tools in order: get_service_notices \u2192 get_route_options (outbound) \u2192 get_route_options (return) \u2192 get_weather \u2192 evaluate_journeys \u2192 submit_travel_plan.
 All data is demo/scheduled data for hackathon purposes.`;

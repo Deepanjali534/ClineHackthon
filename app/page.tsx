@@ -65,7 +65,7 @@ export default function Home() {
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-1">Today&apos;s Best Route</p>
-                  <p className="text-white font-bold">Lajpat Nagar → Connaught Place</p>
+                  <p className="text-white font-bold">Your Route, Any Delhi Stop</p>
                 </div>
                 <span className="px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-400 text-xs font-bold">BALANCED</span>
               </div>

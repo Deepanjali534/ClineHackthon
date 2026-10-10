@@ -1,6 +1,6 @@
 // Deterministic journey planner with 5 optimization modes
 import { CommuteRequest, JourneyPlan, JourneyLeg, JourneyStep, OptimizationMode, OptimizationWeights, RouteOption } from './types';
-import { getRouteOptions, getCancelledTrips } from './transport';
+import { getRouteOptions, getCancelledTrips, resolveArea } from './transport';
 import { getWeather, getWeatherForJourney } from './weather';
 
 const WEIGHTS: Record<OptimizationMode, OptimizationWeights> = {
@@ -31,14 +31,14 @@ function scoreOption(opt: RouteOption, mode: OptimizationMode, allOptions: Route
   return w.cost * costScore + w.time * timeScore + w.walk * walkScore + w.transfers * transferScore + w.comfort * comfortScore;
 }
 
-function buildLeg(opt: RouteOption, isReturn: boolean): JourneyLeg {
+function buildLeg(opt: RouteOption, isReturn: boolean, origin = 'Origin', destination = 'Destination'): JourneyLeg {
   const walkMins = Math.ceil(opt.walkToStopMeters / 80);
   const walkBackMins = Math.ceil(opt.walkFromStopMeters / 80);
 
   const steps: JourneyStep[] = [
     {
       type: 'walk',
-      description: `Walk ${opt.walkToStopMeters}m to ${isReturn ? 'CP' : 'Lajpat Nagar'} bus stop`,
+      description: `Walk ${opt.walkToStopMeters}m to ${isReturn ? destination : origin} stop`,
       durationMins: walkMins,
       distanceMeters: opt.walkToStopMeters,
       costINR: 0,
@@ -46,7 +46,7 @@ function buildLeg(opt: RouteOption, isReturn: boolean): JourneyLeg {
     },
     {
       type: opt.mode as any,
-      description: `${opt.routeName} \u2192 ${isReturn ? 'Lajpat Nagar' : 'Connaught Place'} (\u20b9${opt.fareINR})`,
+      description: `${opt.routeName} \u2192 ${isReturn ? origin : destination} (\u20b9${opt.fareINR})`,
       durationMins: opt.durationMins,
       costINR: opt.fareINR,
       serviceId: opt.tripId,
@@ -54,7 +54,7 @@ function buildLeg(opt: RouteOption, isReturn: boolean): JourneyLeg {
     },
     {
       type: 'walk',
-      description: `Walk ${opt.walkFromStopMeters}m to destination`,
+      description: `Walk ${opt.walkFromStopMeters}m to ${isReturn ? origin : destination}`,
       durationMins: walkBackMins,
       distanceMeters: opt.walkFromStopMeters,
       costINR: 0,
@@ -77,7 +77,9 @@ export async function planJourney(req: CommuteRequest, id: string, cancelledTrip
 
   const deadlineMins = timeToMins(req.arrivalDeadline);
 
-  const outboundOptions = getRouteOptions('lajpat', 'cp', '06:00', cancelled);
+  const originKey = resolveArea(req.origin);
+  const destKey = resolveArea(req.destination);
+  const outboundOptions = getRouteOptions(originKey, destKey, '06:00', cancelled);
   const feasibleOutbound = outboundOptions.filter(opt => {
     const arrMins = timeToMins(opt.arrivalTime);
     return arrMins <= deadlineMins && opt.fareINR <= req.dailyBudgetINR / 2;
@@ -92,7 +94,7 @@ export async function planJourney(req: CommuteRequest, id: string, cancelledTrip
   const bestOutbound = scoredOutbound[0].opt;
   const backupOutbound = scoredOutbound[1]?.opt;
 
-  const returnOptions = getRouteOptions('cp', 'lajpat', req.returnReadyTime, cancelled);
+  const returnOptions = getRouteOptions(destKey, originKey, req.returnReadyTime, cancelled);
   const feasibleReturn = returnOptions.filter(opt => opt.fareINR <= req.dailyBudgetINR - bestOutbound.fareINR);
 
   if (feasibleReturn.length === 0) {
@@ -108,8 +110,8 @@ export async function planJourney(req: CommuteRequest, id: string, cancelledTrip
 
   const plan: JourneyPlan = {
     id,
-    outbound: buildLeg(bestOutbound, false),
-    returnLeg: buildLeg(bestReturn, true),
+    outbound: buildLeg(bestOutbound, false, req.origin, req.destination),
+    returnLeg: buildLeg(bestReturn, true, req.origin, req.destination),
     totalCostINR: totalCost,
     totalWalkMeters: totalWalk,
     meetsDeadline: timeToMins(bestOutbound.arrivalTime) <= deadlineMins,
@@ -128,8 +130,8 @@ export async function planJourney(req: CommuteRequest, id: string, cancelledTrip
     plan.backup = {
       ...plan,
       id: `${id}_backup`,
-      outbound: buildLeg(backupOutbound, false),
-      returnLeg: buildLeg(backupReturn, true),
+      outbound: buildLeg(backupOutbound, false, req.origin, req.destination),
+      returnLeg: buildLeg(backupReturn, true, req.origin, req.destination),
       totalCostINR: backupOutbound.fareINR + backupReturn.fareINR,
       optimizationScore: scoredOutbound[1]?.score ?? 0,
       explanation: `Backup: ${backupOutbound.routeName} at ${backupOutbound.departureTime} — use if primary option is missed.`,
