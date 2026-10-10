@@ -1,57 +1,38 @@
 'use client';
-
 import { useState } from 'react';
 import { ServiceNotice } from '@/lib/types';
 import { NoticeForm } from '@/components/admin/NoticeForm';
 import { NoticeReview } from '@/components/admin/NoticeReview';
 import { NoticeList } from '@/components/admin/NoticeList';
 import { SourceBadge } from '@/components/shared/SourceBadge';
-
 export default function AdminPage() {
-  const [pendingNotice, setPendingNotice] = useState<ServiceNotice | null>(null);
+  const [pending, setPending] = useState<ServiceNotice | null>(null);
   const [notices, setNotices] = useState<ServiceNotice[]>([]);
-
-  const handleSubmitted = (notice: ServiceNotice) => {
-    setPendingNotice(notice);
-  };
-
-  const handleReviewed = (id: string, action: 'approve' | 'reject') => {
-    if (pendingNotice && pendingNotice.id === id) {
-      const updated = { ...pendingNotice, status: action === 'approve' ? 'approved' : 'rejected' } as ServiceNotice;
-      setNotices((prev) => [updated, ...prev]);
-      setPendingNotice(null);
-    }
-  };
-
   return (
-    <div className="space-y-6">
+    <div className="max-w-7xl mx-auto px-8 py-8 space-y-8">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-gray-800">⚙️ Admin Panel</h1>
+        <div>
+          <h1 className="text-2xl font-black text-white">Admin Panel</h1>
+          <p className="text-sm text-slate-500 mt-1">Submit and review service disruption notices</p>
+        </div>
         <SourceBadge type="demo" />
       </div>
-
-      <p className="text-sm text-gray-500">
-        Submit raw service disruption notices. The AI will extract structured data for your review before publishing to affected users.
-      </p>
-
-      <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-        <NoticeForm onSubmitted={handleSubmitted} />
-        {pendingNotice ? (
-          <NoticeReview notice={pendingNotice} onReviewed={handleReviewed} />
+      <div className="grid grid-cols-2 gap-6">
+        <NoticeForm onSubmitted={n => setPending(n)} />
+        {pending ? (
+          <NoticeReview notice={pending} onReviewed={(id,action) => {
+            setNotices(p => [{ ...pending!, status: action === 'approve' ? 'approved' : 'rejected' } as ServiceNotice, ...p]);
+            setPending(null);
+          }} />
         ) : (
-          <div className="rounded-xl border border-dashed border-gray-300 bg-gray-50 p-8 flex items-center justify-center">
-            <p className="text-sm text-gray-400 text-center">
-              Submit a notice on the left → AI extracted draft will appear here for review.
-            </p>
+          <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] flex items-center justify-center p-12">
+            <p className="text-sm text-slate-600 text-center">Submit a notice on the left &#8594;<br />AI extracted draft appears here</p>
           </div>
         )}
       </div>
-
-      <div>
-        <h2 className="font-semibold text-gray-700 mb-3">📋 Processed Notices</h2>
-        <div className="rounded-xl border border-gray-200 bg-white p-4">
-          <NoticeList notices={notices} />
-        </div>
+      <div className="rounded-2xl border border-[#1e3a5f] bg-[#0d1526] p-6">
+        <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-4">Processed Notices</p>
+        <NoticeList notices={notices} />
       </div>
     </div>
   );

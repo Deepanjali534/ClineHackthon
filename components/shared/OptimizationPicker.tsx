@@ -1,89 +1,28 @@
 'use client';
-
 import { OptimizationMode } from '@/lib/types';
-
-interface OptimizationPickerProps {
-  value: OptimizationMode;
-  onChange: (mode: OptimizationMode) => void;
-}
-
-const modes: {
-  id: OptimizationMode;
-  icon: string;
-  label: string;
-  subtitle: string;
-  color: string;
-  selectedBg: string;
-  selectedBorder: string;
-}[] = [
-  {
-    id: 'cheapest',
-    icon: '💰',
-    label: 'CHEAPEST',
-    subtitle: 'Save every rupee',
-    color: 'text-green-700',
-    selectedBg: 'bg-green-50',
-    selectedBorder: 'border-green-500',
-  },
-  {
-    id: 'fastest',
-    icon: '⏱️',
-    label: 'FASTEST',
-    subtitle: 'Get there now',
-    color: 'text-blue-700',
-    selectedBg: 'bg-blue-50',
-    selectedBorder: 'border-blue-500',
-  },
-  {
-    id: 'least_walk',
-    icon: '🚶',
-    label: 'LEAST WALK',
-    subtitle: 'Easy on the legs',
-    color: 'text-orange-700',
-    selectedBg: 'bg-orange-50',
-    selectedBorder: 'border-orange-500',
-  },
-  {
-    id: 'comfortable',
-    icon: '😌',
-    label: 'COMFORTABLE',
-    subtitle: 'Fewest transfers',
-    color: 'text-purple-700',
-    selectedBg: 'bg-purple-50',
-    selectedBorder: 'border-purple-500',
-  },
-  {
-    id: 'balanced',
-    icon: '⚖️',
-    label: 'BALANCED',
-    subtitle: 'Cline picks best',
-    color: 'text-gray-700',
-    selectedBg: 'bg-gray-50',
-    selectedBorder: 'border-gray-500',
-  },
+interface Props { value: OptimizationMode; onChange: (m: OptimizationMode) => void; }
+const modes: { id: OptimizationMode; icon: string; label: string; sub: string; selCls: string }[] = [
+  { id: 'cheapest',    icon: '\U0001F4B0', label: 'CHEAPEST',    sub: 'Save every rupee',  selCls: 'from-emerald-900/50 to-emerald-800/20 border-emerald-500' },
+  { id: 'fastest',     icon: '\u23F1',     label: 'FASTEST',     sub: 'Get there now',     selCls: 'from-blue-900/50 to-blue-800/20 border-blue-500' },
+  { id: 'least_walk',  icon: '\U0001F6B6', label: 'LEAST WALK',  sub: 'Easy on the legs',  selCls: 'from-orange-900/50 to-orange-800/20 border-orange-500' },
+  { id: 'comfortable', icon: '\U0001F60C', label: 'COMFORTABLE', sub: 'Fewest transfers',  selCls: 'from-purple-900/50 to-purple-800/20 border-purple-500' },
+  { id: 'balanced',    icon: '\u2696',     label: 'BALANCED',    sub: 'Cline picks best',  selCls: 'from-slate-800/50 to-slate-700/20 border-slate-400' },
 ];
-
-export function OptimizationPicker({ value, onChange }: OptimizationPickerProps) {
+export function OptimizationPicker({ value, onChange }: Props) {
   return (
     <div>
-      <p className="mb-2 text-sm font-medium text-gray-700">Optimization Mode</p>
-      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-        {modes.map((mode) => {
-          const selected = value === mode.id;
+      <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-3">Optimization Mode</p>
+      <div className="grid grid-cols-5 gap-2">
+        {modes.map(m => {
+          const sel = value === m.id;
           return (
-            <button
-              key={mode.id}
-              type="button"
-              onClick={() => onChange(mode.id)}
-              className={`flex min-w-[90px] flex-col items-center rounded-xl border-2 p-3 transition-all
-                ${selected ? `${mode.selectedBg} ${mode.selectedBorder} shadow-md` : 'border-gray-200 bg-white hover:border-gray-300'}
-              `}
-            >
-              <span className="text-2xl">{mode.icon}</span>
-              <span className={`mt-1 text-[10px] font-bold tracking-wide ${selected ? mode.color : 'text-gray-600'}`}>
-                {mode.label}
-              </span>
-              <span className="mt-0.5 text-center text-[9px] text-gray-500">{mode.subtitle}</span>
+            <button key={m.id} type="button" onClick={() => onChange(m.id)}
+              className={`relative flex flex-col items-center p-4 rounded-2xl border-2 transition-all duration-200 cursor-pointer ${
+                sel ? `bg-gradient-to-br ${m.selCls} shadow-lg` : 'bg-[#0d1526] border-[#1e3a5f] hover:border-slate-500/50'}`}>
+              {sel && <span className="absolute top-2 right-2 text-[10px] text-white/60">&#10003;</span>}
+              <span className="text-2xl mb-2">{m.icon}</span>
+              <span className={`text-[10px] font-bold tracking-wider ${sel ? 'text-white' : 'text-slate-400'}`}>{m.label}</span>
+              <span className="text-[9px] text-slate-500 text-center mt-0.5">{m.sub}</span>
             </button>
           );
         })}

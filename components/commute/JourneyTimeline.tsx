@@ -1,28 +1,22 @@
 import { JourneyLeg } from '@/lib/types';
 import { StepCard } from './StepCard';
-
-interface JourneyTimelineProps {
-  leg: JourneyLeg;
-  label: string;
-  emoji: string;
-}
-
-export function JourneyTimeline({ leg, label, emoji }: JourneyTimelineProps) {
+interface Props { leg: JourneyLeg; label: string; emoji: string; }
+export function JourneyTimeline({ leg, label, emoji }: Props) {
   return (
     <div>
-      <div className="flex items-center gap-2 mb-2">
-        <span className="text-lg">{emoji}</span>
-        <h3 className="font-semibold text-gray-800">{label}</h3>
-        <span className="ml-auto text-sm text-gray-500">{leg.departureTime} → {leg.arrivalTime}</span>
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <span>{emoji}</span>
+          <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest">{label}</span>
+        </div>
+        <span className="text-sm font-bold text-white">{leg.departureTime} &#8594; {leg.arrivalTime}</span>
       </div>
-      <div className="pl-2 border-l-2 border-blue-200 space-y-1">
-        {leg.steps.map((step, i) => (
-          <StepCard key={i} step={step} />
-        ))}
+      <div className="border-l-2 border-blue-500/20 ml-1.5 space-y-0">
+        {leg.steps.map((step, i) => <StepCard key={i} step={step} />)}
       </div>
-      <div className="mt-2 flex gap-4 text-xs text-gray-600">
-        <span>💰 ₹{leg.costINR}</span>
-        <span>🚶 {leg.walkMeters}m walk</span>
+      <div className="flex gap-3 mt-3 pt-3 border-t border-white/5">
+        <span className="text-xs text-emerald-400 font-semibold">&#8377;{leg.costINR}</span>
+        <span className="text-xs text-slate-500">{leg.walkMeters}m walk</span>
       </div>
     </div>
   );

@@ -1,19 +1,13 @@
-interface WalkIndicatorProps {
-  meters: number;
-  maxMeters: number;
-}
-
+interface WalkIndicatorProps { meters: number; maxMeters: number; }
 export function WalkIndicator({ meters, maxMeters }: WalkIndicatorProps) {
-  // pct unused
   const ok = meters <= maxMeters;
   return (
-    <div className="flex items-center gap-2 text-sm">
-      <span>🚶</span>
-      <span className={ok ? 'text-green-700' : 'text-red-700'}>
-        {meters}m walk
-        {!ok && <span className="ml-1 text-xs">(exceeds {maxMeters}m limit)</span>}
+    <div className="flex items-center gap-2">
+      <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${
+        ok ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : 'bg-red-500/10 text-red-400 border-red-500/30'
+      }`}>
+        Walk: {meters}m {ok ? '\u2713' : `(max ${maxMeters}m)`}
       </span>
-      {ok && <span className="text-green-600 text-xs">✅</span>}
     </div>
   );
 }
