@@ -1,113 +1,101 @@
 import { JourneyPlan } from '@/lib/types';
-import { JourneyTimeline } from './JourneyTimeline';
-import { BudgetBar } from '@/components/shared/BudgetBar';
-import { WalkIndicator } from '@/components/shared/WalkIndicator';
-import { SourceBadge } from '@/components/shared/SourceBadge';
+import { StepCard } from './StepCard';
 
-const modeLabel: Record<string,string> = {
-  cheapest:'&#x1F4B0; CHEAPEST', fastest:'&#x23F1; FASTEST', least_walk:'&#x1F6B6; LEAST WALK',
-  comfortable:'&#x1F60C; COMFORTABLE', balanced:'&#x2696; BALANCED',
-};
-const modeBadge: Record<string,string> = {
-  cheapest:'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
-  fastest:'bg-blue-500/10 text-blue-400 border-blue-500/30',
-  least_walk:'bg-orange-500/10 text-orange-400 border-orange-500/30',
-  comfortable:'bg-purple-500/10 text-purple-400 border-purple-500/30',
-  balanced:'bg-slate-500/10 text-slate-400 border-slate-500/30',
-};
+const modeColors: Record<string,string> = { cheapest:'bg-emerald-100 text-emerald-700', fastest:'bg-blue-100 text-blue-700', least_walk:'bg-orange-100 text-orange-700', comfortable:'bg-purple-100 text-purple-700', balanced:'bg-slate-100 text-slate-700' };
 
-interface Props {
-  plan: JourneyPlan; budget: number; maxWalk: number;
-  isHighlighted?: boolean; onNavigate?: () => void; onSave?: () => void; onViewBackup?: () => void;
-}
+interface Props { plan: JourneyPlan; budget: number; maxWalk: number; onNavigate?: () => void; onSave?: () => void; onViewBackup?: () => void; isHighlighted?: boolean; }
 
-export function JourneyCard({ plan, budget, maxWalk, isHighlighted, onNavigate, onSave, onViewBackup }: Props) {
+export function JourneyCard({ plan, budget, maxWalk, onNavigate, onSave, onViewBackup }: Props) {
+  const chipCls = 'px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-semibold';
+
+  const LegSection = ({ leg, label }: { leg: typeof plan.outbound, label: string }) => (
+    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 mb-4">
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">{label}</span>
+      </div>
+      <div className="flex items-baseline gap-2 mb-3">
+        <span className="text-3xl font-black text-slate-900">{leg.departureTime}</span>
+        <span className="text-slate-400 text-lg">&rarr;</span>
+        <span className="text-3xl font-black text-slate-900">{leg.arrivalTime}</span>
+      </div>
+      <div className="flex flex-wrap gap-2 mb-4">
+        <span className={chipCls}>{leg.steps.reduce((a,s) => a + s.durationMins, 0)} min</span>
+        <span className={chipCls}>{leg.walkMeters} m walk</span>
+        <span className={chipCls}>0 transfers</span>
+        <span className={chipCls}>&#8377;{leg.costINR}</span>
+      </div>
+      {/* Timeline */}
+      <div className="border-l-2 border-blue-100 ml-3 pl-4 space-y-1">
+        {leg.steps.map((step, i) => <StepCard key={i} step={step} />)}
+      </div>
+    </div>
+  );
+
   return (
-    <div className={`rounded-2xl overflow-hidden border transition-all duration-300 card-hover ${
-      isHighlighted ? 'border-blue-500/40 shadow-[0_0_40px_rgba(59,130,246,0.15)]' : 'border-[#1e3a5f]'}`}>
-      {/* Top accent bar */}
-      <div className="h-1 w-full bg-gradient-to-r from-blue-600 via-purple-500 to-cyan-400" />
-      <div className="bg-[#0d1526] p-6 space-y-5">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            {isHighlighted && <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold">✓ RECOMMENDED</span>}
-            <span className={`px-2.5 py-1 rounded-full border text-xs font-bold ${modeBadge[plan.optimizationMode]}`}>
-              {modeLabel[plan.optimizationMode]}
-            </span>
-          </div>
-          <div className="text-right">
-            <div className="text-2xl font-black text-white">₹{plan.totalCostINR}</div>
-            <div className="text-xs text-slate-500">Score: {plan.optimizationScore}/100</div>
-          </div>
+    <div className="space-y-0">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h2 className="text-xl font-black text-slate-900">Your routes</h2>
+          <p className="text-sm text-slate-500">{plan.outbound.departureTime} departure &rarr; arrives {plan.outbound.arrivalTime}</p>
         </div>
-
-        {/* Constraint badges */}
-        <div className="flex flex-wrap gap-2">
-          <span className={`px-2.5 py-1 rounded-full border text-xs font-semibold ${plan.meetsDeadline ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : 'bg-red-500/10 text-red-400 border-red-500/30'}`}>
-            {plan.meetsDeadline ? '✓' : '&#10007;'} Deadline
+        <div className="flex items-center gap-2">
+          <span className={`px-3 py-1 rounded-full text-xs font-bold ${modeColors[plan.optimizationMode] || modeColors.balanced}`}>
+            {plan.optimizationMode.replace('_',' ').toUpperCase()}
           </span>
-          <span className={`px-2.5 py-1 rounded-full border text-xs font-semibold ${plan.meetsBudget ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : 'bg-red-500/10 text-red-400 border-red-500/30'}`}>
-            {plan.meetsBudget ? '✓' : '&#10007;'} Budget
-          </span>
-          <span className={`px-2.5 py-1 rounded-full border text-xs font-semibold ${plan.meetsWalkLimit ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : 'bg-orange-500/10 text-orange-400 border-orange-500/30'}`}>
-            {plan.meetsWalkLimit ? '✓' : '&#9888;'} Walk
+          <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+            plan.meetsDeadline && plan.meetsBudget ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
+            {plan.meetsDeadline && plan.meetsBudget ? 'All constraints met' : 'Some constraints missed'}
           </span>
         </div>
+      </div>
 
-        {/* Two-col legs */}
-        <div className="grid grid-cols-2 gap-6">
-          <JourneyTimeline leg={plan.outbound} label="OUTBOUND" emoji="🌅" />
-          <JourneyTimeline leg={plan.returnLeg} label="RETURN" emoji="&#127750;" />
-        </div>
+      <LegSection leg={plan.outbound} label="Outbound" />
+      <LegSection leg={plan.returnLeg} label="Return" />
 
-        {/* Metrics */}
-        <div className="grid grid-cols-2 gap-4">
-          <BudgetBar spent={plan.totalCostINR} total={budget} />
-          <WalkIndicator meters={plan.totalWalkMeters} maxMeters={maxWalk} />
-        </div>
+      {/* AI Explanation */}
+      <div className="bg-blue-50 border border-blue-100 rounded-2xl p-5 mb-4">
+        <p className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-2">&#129302; AI Explanation</p>
+        <p className="text-sm text-slate-700">{plan.explanation}</p>
+      </div>
 
-        {/* Weather */}
-        <p className="text-sm text-slate-400">{plan.weatherSummary}</p>
-
-        {/* AI explanation */}
-        <div className="border-l-2 border-purple-500/50 pl-4">
-          <p className="text-xs text-slate-400 italic">
-            <span className="text-purple-400 font-semibold not-italic">🤖 Cline: </span>
-            {plan.explanation}
-          </p>
-        </div>
-
-        {/* Data source - computed from actual step data */}
-        {(() => {
-          const allSteps = [...plan.outbound.steps, ...plan.returnLeg.steps];
-          const types = Array.from(new Set(allSteps.map(s => s.sourceType)));
-          return types.length > 0 ? (
-            <div className="flex flex-wrap gap-2 items-center">
-              <span className="text-xs text-slate-600">Data:</span>
-              {types.map(t => <SourceBadge key={t} type={t} />)}
+      {/* Constraint check */}
+      <div className="bg-white border border-slate-100 rounded-2xl p-5 mb-4 shadow-sm">
+        <p className="text-sm font-bold text-slate-700 mb-3">Constraint check</p>
+        <div className="space-y-2">
+          {[
+            { label: 'Arrival deadline satisfied', ok: plan.meetsDeadline },
+            { label: 'Walking limit satisfied', ok: plan.meetsWalkLimit },
+            { label: 'Daily budget satisfied', ok: plan.meetsBudget },
+          ].map(c => (
+            <div key={c.label} className="flex items-center gap-2 text-sm">
+              <span className={c.ok ? 'text-emerald-500' : 'text-red-500'}>{c.ok ? '&#9989;' : '&#10060;'}</span>
+              <span className={c.ok ? 'text-slate-700' : 'text-red-600'}>{c.label}</span>
             </div>
-          ) : null;
-        })()} 
-
-        {/* Actions */}
-        <div className="flex gap-3 pt-2">
-          {onNavigate && (
-            <button onClick={onNavigate} className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 text-white text-sm font-bold hover:shadow-[0_0_20px_rgba(59,130,246,0.4)] transition-all">
-              Navigate →
-            </button>
-          )}
-          {onSave && (
-            <button onClick={onSave} className="px-4 py-2.5 rounded-xl border border-white/10 bg-white/5 text-slate-300 text-sm font-medium hover:bg-white/10 transition-all">
-              Save
-            </button>
-          )}
-          {plan.backup && onViewBackup && (
-            <button onClick={onViewBackup} className="px-4 py-2.5 rounded-xl border border-white/10 bg-white/5 text-slate-300 text-sm font-medium hover:bg-white/10 transition-all">
-              Backup &#9660;
-            </button>
-          )}
+          ))}
         </div>
+      </div>
+
+      {/* Actions */}
+      <div className="flex gap-3">
+        {onNavigate && (
+          <button onClick={onNavigate}
+            className="flex-1 py-3 rounded-full bg-blue-600 text-white font-bold text-sm hover:bg-blue-700 transition-colors shadow-md">
+            View full route
+          </button>
+        )}
+        {onSave && (
+          <button onClick={onSave}
+            className="px-6 py-3 rounded-full border border-slate-300 text-slate-700 font-semibold text-sm hover:bg-slate-50 transition-colors">
+            Save
+          </button>
+        )}
+        {onViewBackup && (
+          <button onClick={onViewBackup}
+            className="px-6 py-3 rounded-full border border-slate-300 text-slate-700 font-semibold text-sm hover:bg-slate-50 transition-colors">
+            Backup options
+          </button>
+        )}
       </div>
     </div>
   );

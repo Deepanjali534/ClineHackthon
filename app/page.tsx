@@ -2,118 +2,90 @@ import Link from 'next/link';
 
 export default function Home() {
   return (
-    <div className="relative min-h-screen flex items-center overflow-hidden">
-      {/* City road grid */}
-      <div className="absolute inset-0 z-0 pointer-events-none" style={{backgroundImage:"linear-gradient(rgba(59,130,246,0.04) 1px, transparent 1px),linear-gradient(90deg,rgba(59,130,246,0.04) 1px,transparent 1px)",backgroundSize:"80px 80px"}} />
-      {/* Floating orbs bg */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-blue-600/10 blur-3xl animate-float" />
-        <div className="absolute bottom-1/4 right-1/3 w-80 h-80 rounded-full bg-purple-600/10 blur-3xl animate-float" style={{animationDelay:'2s'}} />
-        <div className="absolute top-1/2 right-1/4 w-64 h-64 rounded-full bg-cyan-600/8 blur-3xl animate-float" style={{animationDelay:'4s'}} />
+    <div className="space-y-6">
+      {/* Hero banner - blue gradient like reference */}
+      <div className="rounded-2xl bg-gradient-to-br from-blue-700 via-blue-600 to-blue-400 p-8 text-white shadow-lg">
+        <p className="text-sm font-medium text-blue-200 mb-1">Today&apos;s commute</p>
+        <h1 className="text-4xl font-black tracking-tight mb-3">Plan your route</h1>
+        <p className="text-blue-100 text-base max-w-lg mb-6">
+          Enter your origin and destination — AI finds the best Delhi bus or metro route for your schedule and budget.
+        </p>
+
+        {/* Stat chips */}
+        <div className="grid grid-cols-4 gap-3 mb-6">
+          {[
+            { icon: '⏰', val: 'Real-time', label: 'Departures' },
+            { icon: '⇄', val: 'Any area', label: 'Delhi coverage' },
+            { icon: '🚶', val: 'Walk calc', label: 'Auto routed' },
+            { icon: '💳', val: 'Fare est.', label: 'Day cost' },
+          ].map(s => (
+            <div key={s.label} className="bg-white/15 backdrop-blur rounded-xl p-4">
+              <div className="text-xl mb-1">{s.icon}</div>
+              <div className="text-lg font-bold">{s.val}</div>
+              <div className="text-xs text-blue-200">{s.label}</div>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex gap-3">
+          <Link href="/commute" className="bg-white text-blue-700 font-bold px-6 py-2.5 rounded-full hover:bg-blue-50 transition-all shadow-md text-sm">
+            Plan Journey
+          </Link>
+          <Link href="/trip" className="border border-white/40 text-white font-semibold px-6 py-2.5 rounded-full hover:bg-white/10 transition-all text-sm">
+            Plan a Trip
+          </Link>
+        </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-8 py-20 w-full">
-        <div className="grid grid-cols-12 gap-12 items-center">
-          {/* LEFT — Hero copy */}
-          <div className="col-span-7 space-y-8">
-            <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-semibold tracking-widest uppercase mb-6">
-                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
-                AI-POWERED TRAVEL
-              </div>
-              <h1 className="text-7xl font-black leading-none mb-4">
-                <span className="block text-white">India&apos;s Smartest</span>
-                <span className="block bg-gradient-to-r from-blue-400 via-cyan-300 to-blue-200 bg-clip-text text-transparent">Travel Companion</span>
-              </h1>
-              <p className="text-lg text-slate-400 max-w-xl leading-relaxed">
-                Real-time journey planning for Indian commuters. Optimised for your budget, time, and comfort — powered by Cline AI.
-              </p>
-            </div>
-
-            {/* Feature pills */}
-            <div className="flex flex-wrap gap-3">
-              {[
-                { icon: '💰', label: 'Smart Pricing' },
-                { icon: '⚡', label: 'Live Rerouting' },
-                { icon: '🤖', label: 'AI Powered' },
-                { icon: '🗺️', label: 'Delhi Metro' },
-                { icon: '🚌', label: 'DTC Bus Routes' },
-              ].map(f => (
-                <div key={f.label} className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm text-slate-300 hover:bg-white/10 hover:border-blue-500/40 hover:text-white hover:-translate-y-0.5 transition-all duration-200 cursor-default">
-                  <span>{f.icon}</span><span>{f.label}</span>
-                </div>
-              ))}
-            </div>
-
-            {/* CTAs */}
-            <div className="flex gap-4">
-              <Link href="/commute"
-                className="flex items-center gap-2 px-8 py-4 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 text-white font-bold text-base shadow-[0_0_30px_rgba(59,130,246,0.4)] hover:shadow-[0_0_60px_rgba(59,130,246,0.7)] hover:-translate-y-1 hover:scale-105 transition-all duration-300">
-                Plan My Commute <span className="text-lg">→</span>
-              </Link>
-              <Link href="/trip"
-                className="flex items-center gap-2 px-8 py-4 rounded-xl border border-blue-500/40 text-blue-400 font-bold text-base hover:bg-blue-500/10 hover:border-blue-400 transition-all duration-300">
-                Plan a Trip ✈️
-              </Link>
-            </div>
+      {/* 3 info cards */}
+      <div className="grid grid-cols-3 gap-4">
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold text-slate-900">Weather</h3>
           </div>
-
-          {/* RIGHT — Stats cards */}
-          <div className="col-span-5 space-y-4">
-            {/* Main route card */}
-            <div className="glass-card rounded-2xl p-6 shadow-[0_0_40px_rgba(59,130,246,0.1)] hover:shadow-[0_0_60px_rgba(59,130,246,0.25)] hover:-translate-y-1 transition-all duration-300 cursor-default">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-1">Today&apos;s Best Route</p>
-                  <p className="text-white font-bold">Your Route, Any Delhi Stop</p>
+          <div className="space-y-3">
+            {[
+              { icon: '☀️', cond: 'Clear', sub: 'Morning · 10% rain', temp: '28°' },
+              { icon: '🌧️', cond: 'Humid', sub: 'Afternoon · 30% rain', temp: '31°' },
+            ].map(w => (
+              <div key={w.cond} className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-xl">{w.icon}</div>
+                <div className="flex-1">
+                  <div className="text-sm font-semibold text-slate-800">{w.cond}</div>
+                  <div className="text-xs text-slate-400">{w.sub}</div>
                 </div>
-                <span className="px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-400 text-xs font-bold">BALANCED</span>
+                <div className="text-lg font-bold text-slate-700">{w.temp}</div>
               </div>
-              <div className="flex gap-6 mb-4">
-                {[{icon:'⏱',val:'47 mins',lbl:'Duration'},{icon:'💰',val:'₹30',lbl:'Fare'},{icon:'🚶',val:'750m',lbl:'Walking'}].map(s=>(
-                  <div key={s.lbl}>
-                    <div className="text-xl font-black text-white">{s.icon} {s.val}</div>
-                    <div className="text-xs text-slate-500">{s.lbl}</div>
-                  </div>
-                ))}
-              </div>
-              <div className="h-1 rounded-full bg-gradient-to-r from-blue-600 via-purple-500 to-cyan-400 opacity-60" />
-            </div>
-
-            {/* 3 mini stat cards */}
-            <div className="grid grid-cols-3 gap-3">
-              <div className="glass-card rounded-xl p-4 hover:bg-white/10 hover:-translate-y-1 hover:shadow-[0_0_20px_rgba(59,130,246,0.15)] transition-all duration-200 cursor-default">
-                <div className="text-lg mb-1">🚌</div>
-                <div className="text-xs font-bold text-white">Route 615</div>
-                <div className="flex items-center gap-1 mt-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /><span className="text-xs text-emerald-400">On Time</span></div>
-              </div>
-              <div className="glass-card rounded-xl p-4 hover:bg-white/10 hover:-translate-y-1 hover:shadow-[0_0_20px_rgba(59,130,246,0.15)] transition-all duration-200 cursor-default">
-                <div className="text-lg mb-1">☀️</div>
-                <div className="text-xs font-bold text-white">Clear 28°C</div>
-                <div className="text-xs text-slate-500 mt-1">No disruptions</div>
-              </div>
-              <div className="glass-card rounded-xl p-4 hover:bg-white/10 hover:-translate-y-1 hover:shadow-[0_0_20px_rgba(59,130,246,0.15)] transition-all duration-200 cursor-default">
-                <div className="text-lg mb-1">💰</div>
-                <div className="text-xs font-bold text-white">₹30 Best</div>
-                <div className="text-xs text-slate-500 mt-1">Today&apos;s fare</div>
-              </div>
-            </div>
-
-            {/* Bottom powered by */}
-            <div className="glass-card rounded-xl p-4 flex items-center gap-3 hover:bg-white/10 hover:-translate-y-0.5 transition-all duration-200 cursor-default">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-sm">🤖</div>
-              <div>
-                <div className="text-xs font-bold text-white">Cline SDK Agent</div>
-                <div className="text-xs text-slate-500">6 tools · Real-time planning · Live monitoring</div>
-              </div>
-              <div className="ml-auto">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
-                </span>
-              </div>
-            </div>
+            ))}
           </div>
+        </div>
+
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+          <h3 className="font-semibold text-slate-900 mb-4">Next departures</h3>
+          <div className="space-y-2">
+            {[
+              { route: '615', type: 'Regular', time: '08:00' },
+              { route: '615', type: 'Regular', time: '08:30' },
+              { route: 'PL', type: 'Metro', time: '08:10' },
+              { route: '423', type: 'Regular', time: '08:15' },
+            ].map((d, i) => (
+              <div key={i} className="flex items-center gap-3">
+                <span className="w-8 h-6 rounded-full bg-blue-600 text-white text-[10px] font-bold flex items-center justify-center">{d.route}</span>
+                <span className="text-sm text-slate-600 flex-1">{d.type}</span>
+                <span className="text-sm font-bold text-slate-800">{d.time}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+          <h3 className="font-semibold text-slate-900 mb-4">Service status</h3>
+          <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl px-4 py-3 text-sm font-semibold mb-4">
+            <span className="text-base">✅</span> All services running
+          </div>
+          <Link href="/admin" className="text-blue-600 text-sm font-medium hover:underline">
+            Open disruption centre →
+          </Link>
         </div>
       </div>
     </div>

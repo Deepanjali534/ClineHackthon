@@ -1,27 +1,20 @@
 import { JourneyStep } from '@/lib/types';
-import { SourceBadge } from '@/components/shared/SourceBadge';
-const dotColor: Record<JourneyStep['type'], string> = {
-  walk: 'bg-orange-400', bus: 'bg-blue-400', metro: 'bg-purple-400', auto: 'bg-yellow-400', wait: 'bg-slate-600',
-};
-const stepIcon: Record<JourneyStep['type'], string> = {
-  walk: '&#128694;', bus: '&#128652;', metro: '&#128647;', auto: '&#128666;', wait: '&#9201;',
-};
-interface Props { step: JourneyStep; }
-export function StepCard({ step }: Props) {
+const modeIcon: Record<string, string> = { walk: '&#128694;', bus: '&#128652;', metro: '&#128647;', auto: '&#128666;', wait: '&#9201;' };
+const modeBg: Record<string, string> = { walk: 'bg-slate-100 text-slate-500', bus: 'bg-blue-600 text-white', metro: 'bg-purple-600 text-white', auto: 'bg-orange-500 text-white', wait: 'bg-slate-100 text-slate-400' };
+interface Props { step: JourneyStep; time?: string; endTime?: string; }
+export function StepCard({ step, time, endTime }: Props) {
   return (
-    <div className="flex gap-3 items-start py-2 pl-1">
-      <div className="flex flex-col items-center mt-1">
-        <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${dotColor[step.type]}`} />
-      </div>
+    <div className="flex gap-4 py-2">
+      {/* Icon */}
+      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm flex-shrink-0 ${modeBg[step.type] || modeBg.bus}`}
+        dangerouslySetInnerHTML={{__html: modeIcon[step.type] || modeIcon.bus}} />
+      {/* Content */}
       <div className="flex-1 min-w-0">
-        <p className="text-sm text-slate-200">{step.description}</p>
-        <div className="flex flex-wrap items-center gap-2 mt-1">
-          <span className="text-xs text-slate-500">{step.durationMins} min</span>
-          {step.distanceMeters && <span className="text-xs text-slate-500">{step.distanceMeters}m</span>}
-          {step.costINR != null && step.costINR > 0 && (
-            <span className="text-xs font-bold text-emerald-400">₹{step.costINR}</span>
-          )}
-          <SourceBadge type={step.sourceType} />
+        <p className="text-sm font-semibold text-slate-800">{step.description}</p>
+        <div className="flex items-center gap-2 text-xs text-slate-400 mt-0.5">
+          {time && endTime && <span>{time}&ndash;{endTime}</span>}
+          {step.distanceMeters && <span>&middot; {step.distanceMeters} m</span>}
+          {step.costINR ? <span className="text-blue-600 font-semibold">&middot; &#8377;{step.costINR}</span> : null}
         </div>
       </div>
     </div>

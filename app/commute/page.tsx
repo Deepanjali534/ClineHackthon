@@ -1,63 +1,77 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { CommuteForm } from '@/components/commute/CommuteForm';
-import { CommuteRequest } from '@/lib/types';
 import { createPlan } from '@/lib/api';
 import { mockPlan } from '@/lib/mock/mockPlan';
+import { OptimizationPicker } from '@/components/shared/OptimizationPicker';
+import { useCommuteForm } from '@/lib/hooks/useCommuteForm';
+
 export default function CommutePage() {
   const router = useRouter();
+  const { form, update, isFormValid, toRequest } = useCommuteForm();
   const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async () => {
+    setLoading(true);
+    try { const { id } = await createPlan(toRequest()); router.push(`/commute/thinking/${id}`); }
+    catch { router.push(`/commute/thinking/${mockPlan.id}`); }
+    finally { setLoading(false); }
+  };
+
+  const inp = 'w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-slate-400 transition-all';
+
   return (
-    <div className="max-w-7xl mx-auto px-8 py-8">
-      <div className="grid grid-cols-12 gap-6">
-        {/* Left: Form */}
-        <div className="col-span-5 space-y-4 min-w-0">
-<CommuteForm isLoading={loading} onSubmit={async (req: CommuteRequest) => {
-            setLoading(true);
-            try {
-              const { id } = await createPlan(req);
-              router.push(`/commute/thinking/${id}`);
-            } catch (err: unknown) {
-              console.error('[Yatra Sathi] Backend error:', err);
-              // Fallback to demo mode if backend unavailable
-              router.push(`/commute/thinking/${mockPlan.id}`);
-            }
-            finally { setLoading(false); }
-          }} />
-        </div>
-        {/* Right: Info panel */}
-        <div className="col-span-7 space-y-5 min-w-0">
-          <div className="rounded-2xl border border-[#1e3a5f] bg-[#0d1526] p-6">
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-4">How It Works</p>
-            <div className="space-y-4">
-              {[{n:'1',t:'Describe Your Journey',d:'Fill the form or type naturally — AI understands both'},
-                {n:'2',t:'AI Plans in Real-Time',d:'Cline SDK evaluates routes, weather, fares, and your constraints'},
-                {n:'3',t:'Monitor Live',d:'Get alerts if disruptions occur — AI replans automatically'}].map(s => (
-                <div key={s.n} className="flex gap-4">
-                  <div className="w-8 h-8 rounded-full bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400 text-xs font-black flex-shrink-0">{s.n}</div>
-                  <div><p className="text-sm font-semibold text-white">{s.t}</p><p className="text-xs text-slate-500 mt-0.5">{s.d}</p></div>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="rounded-2xl border border-[#1e3a5f] bg-[#0d1526] p-6">
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-4">Quick Demo</p>
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm"><span className="text-slate-400">Route</span><span className="text-white font-medium">Lajpat Nagar → CP</span></div>
-              <div className="flex justify-between text-sm"><span className="text-slate-400">Bus 615</span><span className="text-emerald-400 font-medium">On Time ✓</span></div>
-              <div className="flex justify-between text-sm"><span className="text-slate-400">Depart</span><span className="text-white font-medium">08:00</span></div>
-              <div className="flex justify-between text-sm"><span className="text-slate-400">Arrive</span><span className="text-white font-medium">08:52 (8 min early)</span></div>
-              <div className="flex justify-between text-sm"><span className="text-slate-400">Fare</span><span className="text-white font-medium">₹30</span></div>
-              <div className="flex justify-between text-sm"><span className="text-slate-400">Weather</span><span className="text-yellow-400">☀️ Clear 28°C</span></div>
-            </div>
-          </div>
-          <div className="rounded-2xl border border-cyan-500/20 bg-cyan-500/5 p-4 flex items-center gap-3">
-            <span className="relative flex h-2.5 w-2.5 flex-shrink-0"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" /><span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-cyan-400" /></span>
-            <p className="text-xs text-cyan-400">Live disruption monitoring active for Delhi corridor</p>
-          </div>
-        </div>
+    <div className="max-w-2xl mx-auto">
+      <div className="mb-6">
+        <h1 className="text-3xl font-black text-slate-900">Plan your day</h1>
+        <p className="text-slate-500 mt-1">Hard constraints enforced &mdash; AI explains any trade-offs.</p>
       </div>
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 space-y-6">
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="text-sm font-semibold text-slate-700 mb-2 block">Origin</label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-500">&#128205;</span>
+              <input className={`${inp} pl-9`} placeholder="e.g. Lajpat Nagar" value={form.origin} onChange={e => update('origin', e.target.value)} />
+            </div>
+          </div>
+          <div>
+            <label className="text-sm font-semibold text-slate-700 mb-2 block">Destination</label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-500">&#128205;</span>
+              <input className={`${inp} pl-9`} placeholder="e.g. Connaught Place" value={form.destination} onChange={e => update('destination', e.target.value)} />
+            </div>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="text-sm font-semibold text-slate-700 mb-2 block">Arrive by</label>
+            <input type="time" className={inp} value={form.arrivalDeadline} onChange={e => update('arrivalDeadline', e.target.value)} />
+          </div>
+          <div>
+            <label className="text-sm font-semibold text-slate-700 mb-2 block">Leave work at</label>
+            <input type="time" className={inp} value={form.returnReadyTime} onChange={e => update('returnReadyTime', e.target.value)} />
+          </div>
+        </div>
+        <div>
+          <div className="flex justify-between mb-2">
+            <label className="text-sm font-semibold text-slate-700">Daily budget: &#8377;{form.dailyBudgetINR}</label>
+          </div>
+          <input type="range" min={0} max={500} step={10} value={form.dailyBudgetINR} onChange={e => update('dailyBudgetINR', parseInt(e.target.value))} className="w-full accent-blue-600" />
+          <p className="text-xs text-slate-400 mt-1">Round-trip fares combined</p>
+        </div>
+        <div>
+          <label className="text-sm font-semibold text-slate-700 mb-2 block">Walking limit per trip: {form.maxWalkMeters} m</label>
+          <input type="range" min={0} max={3000} step={100} value={form.maxWalkMeters} onChange={e => update('maxWalkMeters', parseInt(e.target.value))} className="w-full accent-blue-600" />
+          <p className="text-xs text-slate-400 mt-1">Max total walking on each journey</p>
+        </div>
+        <OptimizationPicker value={form.optimizationMode} onChange={m => update('optimizationMode', m)} />
+        <button onClick={handleSubmit} disabled={!isFormValid() || loading}
+          className="w-full py-4 rounded-full bg-gradient-to-r from-blue-700 to-blue-500 text-white font-bold text-base shadow-md hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+          {loading ? 'Planning your routes...' : 'Find my routes'}
+        </button>
+      </div>
+      <p className="text-center text-xs text-slate-400 mt-3">Supports all major Delhi areas &mdash; Lajpat Nagar, Sarojini, India Gate, Hauz Khas and more</p>
     </div>
   );
 }
