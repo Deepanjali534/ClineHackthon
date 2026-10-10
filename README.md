@@ -333,11 +333,7 @@ npm start
 - WhatsApp low-data experience
 - Air-quality-aware routing
 
-## Team
 
-**Team Chitosan**Built for the **Cline AI Builder Hackathon — Round 2**.
-
-- **Deepanjali** — Frontend (branch: `deepanjali/main-dev`)
 
 ## References
 
