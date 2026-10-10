@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDb } from '@/lib/db';
+import { getDb, initDb } from '@/lib/db';
 
 export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
-  const db = getDb();
+  await initDb();
+    const db = getDb();
   const plan = db.prepare('SELECT * FROM plans WHERE id=?').get(params.id) as any;
   if (!plan) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 

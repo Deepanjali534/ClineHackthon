@@ -1,5 +1,5 @@
 // Real-time disruption monitoring via free RSS/news feeds
-import { getDb } from './db';
+import { getDb, initDb } from './db';
 
 interface DisruptionEvent {
   title: string;

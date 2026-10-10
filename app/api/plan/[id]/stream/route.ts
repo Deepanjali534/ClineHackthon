@@ -1,10 +1,11 @@
 import { NextRequest } from 'next/server';
-import { getDb } from '@/lib/db';
+import { getDb, initDb } from '@/lib/db';
 import { runTravelAgent, SSEEmitter } from '@/lib/agent';
 import { CommuteRequest } from '@/lib/types';
 
 export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
-  const db = getDb();
+  await initDb();
+    const db = getDb();
   const planRow = db.prepare('SELECT * FROM plans WHERE id=?').get(params.id) as any;
   if (!planRow) {
     return new Response('Not found', { status: 404 });

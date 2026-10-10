@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDb } from '@/lib/db';
+import { getDb, initDb } from '@/lib/db';
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -8,6 +8,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       return NextResponse.json({ error: 'action must be approve or reject' }, { status: 400 });
     }
 
+    await initDb();
     const db = getDb();
     const status = action === 'approve' ? 'approved' : 'rejected';
     db.prepare('UPDATE notices SET status=?, reviewed_at=datetime("now") WHERE id=?').run(status, params.id);

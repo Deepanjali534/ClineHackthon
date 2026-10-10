@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDb } from '@/lib/db';
+import { getDb, initDb } from '@/lib/db';
 
 export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
-  const db = getDb();
+  await initDb();
+    const db = getDb();
   // Poll up to 30s for the trip plan to be ready
   for (let i = 0; i < 30; i++) {
     const row = db.prepare('SELECT * FROM trips_plan WHERE id=?').get(params.id) as any;

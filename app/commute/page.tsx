@@ -15,8 +15,14 @@ export default function CommutePage() {
         <div className="col-span-5 space-y-4 min-w-0">
 <CommuteForm isLoading={loading} onSubmit={async (req: CommuteRequest) => {
             setLoading(true);
-            try { const { id } = await createPlan(req); router.push(`/commute/thinking/${id}`); }
-            catch { router.push(`/commute/thinking/${mockPlan.id}`); }
+            try {
+              const { id } = await createPlan(req);
+              router.push(`/commute/thinking/${id}`);
+            } catch (err: unknown) {
+              console.error('[Yatra Sathi] Backend error:', err);
+              // Fallback to demo mode if backend unavailable
+              router.push(`/commute/thinking/${mockPlan.id}`);
+            }
             finally { setLoading(false); }
           }} />
         </div>

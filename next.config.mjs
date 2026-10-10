@@ -1,10 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    serverComponentsExternalPackages: ['better-sqlite3'],
-  },
-  webpack: (config) => {
-    config.externals.push('better-sqlite3');
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      // sql.js uses wasm - mark as external to avoid bundling issues
+      config.externals = config.externals || [];
+    }
+    // Ignore the old better-sqlite3 if it fails to load
+    config.resolve.alias['better-sqlite3'] = false;
     return config;
   },
 };
