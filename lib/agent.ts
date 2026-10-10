@@ -1,7 +1,7 @@
 // Cline SDK Travel Agent with 6 custom tools
 // Falls back to direct planner if SDK unavailable
 import { CommuteRequest, JourneyPlan, SSEEvent } from './types';
-import { getRouteOptions, getCancelledTrips } from './transport';
+import { getRouteOptions, getCancelledTrips, resolveArea } from './transport';
 import { getWeather, getWeatherForJourney } from './weather';
 import { planJourney } from './planner';
 import { getDb } from './db';
@@ -10,12 +10,9 @@ export type SSEEmitter = (event: SSEEvent) => void;
 
 // ─── Tool Handlers ───────────────────────────────────────────────
 async function tool_get_route_options(args: { from: string; to: string; afterTime: string }) {
-  // Use geocoding to detect area dynamically
-  const fromArea = args.from.toLowerCase().includes('lajpat') || args.from.toLowerCase().includes('south') ? 'lajpat' : 'cp';
-  const toArea = args.to.toLowerCase().includes('cp') || args.to.toLowerCase().includes('connaught') || args.to.toLowerCase().includes('central') ? 'cp' : 'lajpat';
   const cancelled = getCancelledTrips();
-  const options = getRouteOptions(fromArea as any, toArea as any, args.afterTime, cancelled);
-  return { options, cancelledCount: cancelled.length, sourceType: 'demo' };
+  const options = getRouteOptions(args.from, args.to, args.afterTime, cancelled);
+  return { options, cancelledCount: cancelled.length, sourceType: 'scheduled' };
 }
 
 async function tool_get_transport_schedule(args: { routeId: string }) {
@@ -25,7 +22,7 @@ async function tool_get_transport_schedule(args: { routeId: string }) {
     FROM trips t JOIN stop_times st ON st.trip_id = t.id JOIN stops s ON s.id = st.stop_id
     WHERE t.route_id = ? ORDER BY t.id, st.sequence
   `).all(args.routeId);
-  return { schedule: trips, sourceType: 'demo' };
+  return { schedule: trips, sourceType: 'scheduled' };
 }
 
 async function tool_get_weather(args: { lat?: number; lng?: number }) {

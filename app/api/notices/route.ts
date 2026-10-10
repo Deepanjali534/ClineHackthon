@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET() {
-  const db = getDb();
+    const db = getDb();
   const notices = db.prepare('SELECT * FROM notices ORDER BY created_at DESC LIMIT 50').all() as any[];
   return NextResponse.json(notices.map(n => ({
     ...n,

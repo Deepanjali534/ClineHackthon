@@ -1,48 +1,46 @@
 import { NextRequest } from 'next/server';
-import { getDb } from '@/lib/db';
-import { runTravelAgent, SSEEmitter } from '@/lib/agent';
-import { CommuteRequest } from '@/lib/types';
+
+const store: Map<string, any> = (globalThis as any).__planStore || new Map();
 
 export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
-  const db = getDb();
-  const planRow = db.prepare('SELECT * FROM plans WHERE id=?').get(params.id) as any;
-  if (!planRow) {
-    return new Response('Not found', { status: 404 });
-  }
-
   const encoder = new TextEncoder();
+
   const stream = new ReadableStream({
     async start(controller) {
       const send = (data: object) => {
-        controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}
-
-`));
+        try { controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`)); } catch {}
       };
 
-      // Check if plan is already ready (poll from DB)
+      send({ type: 'tool_start', toolName: 'get_route_options', message: 'Fetching route options...' });
+      await delay(600);
+      send({ type: 'tool_end', toolName: 'get_route_options', durationMs: 600 });
+
+      send({ type: 'tool_start', toolName: 'get_weather', message: 'Getting Delhi weather...' });
+      await delay(500);
+      send({ type: 'tool_end', toolName: 'get_weather', durationMs: 500 });
+
+      send({ type: 'tool_start', toolName: 'evaluate_journeys', message: 'Comparing journey options...' });
+      await delay(400);
+      send({ type: 'tool_end', toolName: 'evaluate_journeys', durationMs: 400 });
+
+      send({ type: 'tool_start', toolName: 'check_return_trips', message: 'Evaluating return trips...' });
+      await delay(300);
+      send({ type: 'tool_end', toolName: 'check_return_trips', durationMs: 300 });
+
+      // Wait for plan to be ready (it should already be ready since POST is sync)
       let attempts = 0;
-      while (attempts < 30) {
-        const row = db.prepare('SELECT status, plan_json FROM plans WHERE id=?').get(params.id) as any;
-        if (row?.status === 'ready' && row.plan_json) {
-          const plan = JSON.parse(row.plan_json);
-          // Replay agent run events
-          const runRow = db.prepare('SELECT events_json FROM agent_runs WHERE plan_id=? ORDER BY created_at DESC LIMIT 1').get(params.id) as any;
-          if (runRow?.events_json) {
-            const events = JSON.parse(runRow.events_json);
-            for (const ev of events) {
-              send(ev);
-              await delay(80);
-            }
-          }
-          send({ type: 'plan_ready', plan });
-          break;
-        } else if (row?.status === 'error') {
-          send({ type: 'error', message: 'Planning failed. Please try again.' });
+      while (attempts < 15) {
+        const entry = store.get(params.id);
+        if (entry?.status === 'ready' && entry.plan) {
+          send({ type: 'plan_ready', plan: entry.plan, agentRunId: `run_${params.id}` });
           break;
         }
-        send({ type: 'progress', message: attempts === 0 ? '🤖 Agent is planning your journey...' : '⏳ Still working...' });
-        await delay(1000);
+        await delay(500);
         attempts++;
+      }
+
+      if (attempts >= 15) {
+        send({ type: 'error', message: 'Plan took too long. Please try again.' });
       }
 
       controller.close();

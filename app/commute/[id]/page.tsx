@@ -1,148 +1,107 @@
 'use client';
-
 import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { JourneyPlan } from '@/lib/types';
-import { getPlan, triggerReplan } from '@/lib/api';
+import { triggerReplan } from '@/lib/api';
 import { JourneyCard } from '@/components/commute/JourneyCard';
-import { LiveMonitoringBanner } from '@/components/commute/LiveMonitoringBanner';
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
 import { ErrorState } from '@/components/shared/ErrorState';
-import { SourceBadge } from '@/components/shared/SourceBadge';
-import { DevActivityPanel } from '@/components/shared/DevActivityPanel';
-import { useSSE } from '@/lib/hooks/useSSE';
-import { createMockPlan, mockBackupPlan } from '@/lib/mock/mockPlan';
+import { RouteMap } from '@/components/shared/RouteMap';
+import { mockPlan, mockBackupPlan } from '@/lib/mock/mockPlan';
 
 export default function PlanPage() {
   const params = useParams();
-  const router = useRouter();
   const id = params.id as string;
-  const isDemo = id === 'demo-plan-001';
-
-  const [origin, setOrigin] = useState('Your Location');
-  const [destination, setDestination] = useState('Destination');
-  const [budget, setBudget] = useState(120);
-  const [maxWalk, setMaxWalk] = useState(500);
-  const [plan, setPlan] = useState<JourneyPlan | null>(null);
-  const [loading, setLoading] = useState(true);
+  const isDemo = id === mockPlan.id;
+  const [plan, setPlan] = useState<JourneyPlan | null>(isDemo ? { ...mockPlan, backup: mockBackupPlan } : null);
+  const [loading, setLoading] = useState(!isDemo);
   const [error, setError] = useState('');
   const [showBackup, setShowBackup] = useState(false);
-  const [monitoring, setMonitoring] = useState(false);
-
-  const sseUrl = monitoring && !isDemo ? `/api/plan/${id}/stream` : null;
-  const { events, lastEvent } = useSSE(sseUrl);
 
   useEffect(() => {
-    let o = 'Your Location';
-    let d = 'Destination';
-    try {
-      const stored = localStorage.getItem('lastCommuteRequest');
-      if (stored) {
-        const req = JSON.parse(stored);
-        o = req.origin || 'Your Location';
-        d = req.destination || 'Destination';
-        setOrigin(o);
-        setDestination(d);
-        setBudget(req.dailyBudgetINR || 120);
-        setMaxWalk(req.maxWalkMeters || 500);
-      }
-    } catch {}
-
-    if (isDemo) {
-      const mockP = createMockPlan(o, d);
-      const backupSteps = mockBackupPlan.outbound.steps.map((s) => ({
-        ...s,
-        description: s.description.replace('Your Location', o).replace('Destination', d),
-      }));
-      setPlan({ ...mockP, backup: { ...mockBackupPlan, outbound: { ...mockBackupPlan.outbound, steps: backupSteps } } });
-      setLoading(false);
-      return;
-    }
-
-    const poll = async () => {
-      for (let i = 0; i < 30; i++) {
-        try {
-          const p = await getPlan(id);
-          if (p) { setPlan(p); setLoading(false); return; }
-        } catch (e: any) {
-          if (i === 29) { setError(e.message); setLoading(false); return; }
-        }
-        await new Promise((r) => setTimeout(r, 1000));
-      }
-      setError('Timed out. Please try again.');
-      setLoading(false);
-    };
-    poll();
+    if (isDemo) return;
+    fetch(`/api/plan/${id}`)
+      .then(async res => { if (!res.ok) throw new Error('Plan not found'); const d = await res.json(); return d.plan ?? d; })
+      .then(p => { setPlan(p); setLoading(false); })
+      .catch(e => { setError(e.message); setLoading(false); });
   }, [id, isDemo]);
 
-  useEffect(() => {
-    if (lastEvent?.type === 'plan_ready' && lastEvent.plan) setPlan(lastEvent.plan);
-    if (lastEvent?.type === 'replan' && lastEvent.plan) setPlan(lastEvent.plan);
-  }, [lastEvent]);
-
-  const handleReplan = async (reason: string) => {
-    try { await triggerReplan(id, reason); setMonitoring(true); }
-    catch { console.error('Replan failed'); }
-  };
-
-  if (loading)
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
-        <LoadingSpinner message={`Planning your journey from ${origin} to ${destination}...`} />
-        <p className="text-sm text-gray-500">AI agent is finding the best route for you</p>
-      </div>
-    );
-  if (error) return <ErrorState message={error} onRetry={() => router.back()} />;
+  if (loading) return <LoadingSpinner message="Loading your journey plan..." />;
+  if (error) return <ErrorState message={error} onRetry={() => window.location.reload()} />;
   if (!plan) return <ErrorState message="Plan not found." />;
 
   return (
-    <div className="space-y-4 max-w-4xl mx-auto">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-bold text-gray-900">{origin} &rarr; {destination}</h1>
-          <p className="text-sm text-gray-500">Optimized for {plan.optimizationMode} &middot; v{plan.version}</p>
+    <div className="grid grid-cols-12 gap-6">
+      {/* Main */}
+      <div className="col-span-8">
+        <JourneyCard plan={plan} budget={120} maxWalk={500} isHighlighted
+          onNavigate={() => window.open(`https://maps.google.com?q=${encodeURIComponent(plan.returnLeg.steps[plan.returnLeg.steps.length-1]?.description || 'Delhi')}`, '_blank')}
+          onSave={() => navigator.clipboard?.writeText(window.location.href)}
+          onViewBackup={plan.backup ? () => setShowBackup(s => !s) : undefined} />
+        {showBackup && plan.backup && (
+          <div className="mt-6">
+            <h3 className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-3">Backup options</h3>
+            <JourneyCard plan={plan.backup} budget={120} maxWalk={500} />
+          </div>
+        )}
+        <div className="mt-6">
+          <RouteMap plan={plan} />
         </div>
-        <button onClick={() => router.back()} className="text-sm text-blue-600 hover:underline">&larr; Back</button>
       </div>
 
-      {isDemo && (
-        <div className="flex items-center gap-2 rounded-xl border border-orange-200 bg-orange-50 px-4 py-2.5 text-sm text-orange-800">
-          <SourceBadge type="demo" />
-          <span>Demo mode &mdash; enter ANTHROPIC_API_KEY in .env.local for live AI planning</span>
+      {/* Sidebar */}
+      <div className="col-span-4 space-y-4">
+        {/* Travel agent card */}
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-xl">&#129302;</div>
+            <div>
+              <div className="text-sm font-bold text-slate-900">Travel agent</div>
+              <div className="text-xs text-slate-400">Tools: routes &middot; weather &middot; notices</div>
+            </div>
+          </div>
+          <button className="w-full py-3 rounded-full bg-gradient-to-r from-blue-700 to-blue-500 text-white font-bold text-sm shadow-md hover:shadow-lg transition-all">
+            &#10024; Explain this plan
+          </button>
         </div>
-      )}
 
-      {!monitoring ? (
-        <button onClick={() => setMonitoring(true)} className="w-full rounded-xl border border-green-300 bg-green-50 py-2.5 text-sm font-semibold text-green-700 hover:bg-green-100 transition-colors">
-          Start Live Monitoring
-        </button>
-      ) : (
-        <LiveMonitoringBanner lastEvent={lastEvent} onReplan={handleReplan} />
-      )}
-
-      <a
-        href={`https://www.google.com/maps/dir/${encodeURIComponent(origin)}/${encodeURIComponent(destination)}`}
-        target="_blank" rel="noopener noreferrer"
-        className="flex items-center justify-center gap-2 w-full rounded-xl border border-blue-200 bg-blue-50 py-2.5 text-sm font-semibold text-blue-700 hover:bg-blue-100 transition-colors"
-      >
-        Open in Google Maps: {origin} &rarr; {destination}
-      </a>
-
-      <JourneyCard
-        plan={plan} budget={budget} maxWalk={maxWalk} isHighlighted
-        onNavigate={() => window.open(`https://www.google.com/maps/dir/${encodeURIComponent(origin)}/${encodeURIComponent(destination)}`, '_blank')}
-        onSave={() => alert('Plan saved!')}
-        onViewBackup={plan.backup ? () => setShowBackup(!showBackup) : undefined}
-      />
-
-      {showBackup && plan.backup && (
-        <div>
-          <p className="text-sm font-medium text-gray-500 mb-2">Backup Option</p>
-          <JourneyCard plan={plan.backup} budget={budget} maxWalk={maxWalk} />
+        {/* Live monitoring */}
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+          <p className="text-sm font-bold text-slate-700 mb-3">Live monitoring</p>
+          <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl px-3 py-2 text-sm mb-3">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            All services running
+          </div>
+          <div className="flex gap-2">
+            <button onClick={() => triggerReplan(id, 'late').catch(() => {})}
+              className="flex-1 py-2 rounded-xl border border-orange-200 text-orange-600 text-xs font-semibold hover:bg-orange-50 transition-colors">
+              Running late
+            </button>
+            <button onClick={() => triggerReplan(id, 'missed').catch(() => {})}
+              className="flex-1 py-2 rounded-xl border border-red-200 text-red-600 text-xs font-semibold hover:bg-red-50 transition-colors">
+              Missed bus
+            </button>
+          </div>
         </div>
-      )}
 
-      {monitoring && <DevActivityPanel events={events} agentRunId={plan.agentRunId || 'demo-agent-run-001'} />}
+        {/* Stats */}
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+          <p className="text-sm font-bold text-slate-700 mb-3">Journey summary</p>
+          <div className="space-y-2">
+            {[
+              { label: 'Total cost', val: `\u20b9${plan.totalCostINR}` },
+              { label: 'Total walking', val: `${plan.totalWalkMeters}m` },
+              { label: 'Score', val: `${Math.round(plan.optimizationScore * 100) || plan.optimizationScore}/100` },
+              { label: 'Weather', val: plan.weatherSummary },
+            ].map(s => (
+              <div key={s.label} className="flex justify-between text-sm">
+                <span className="text-slate-500">{s.label}</span>
+                <span className="font-semibold text-slate-800">{s.val}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

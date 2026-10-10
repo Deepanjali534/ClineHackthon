@@ -1,24 +1,15 @@
-type SourceType = 'live' | 'scheduled' | 'estimated' | 'demo' | 'unverified';
-
-interface SourceBadgeProps {
-  type: SourceType;
-  className?: string;
-}
-
-const config: Record<SourceType, { label: string; dot: string; className: string }> = {
-  live:       { label: 'Live',       dot: 'bg-emerald-400', className: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' },
-  scheduled:  { label: 'Scheduled',  dot: 'bg-blue-400',    className: 'bg-blue-500/10 text-blue-400 border-blue-500/30' },
-  estimated:  { label: 'Estimated',  dot: 'bg-yellow-400',  className: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30' },
-  demo:       { label: 'Demo Data',  dot: 'bg-orange-400',  className: 'bg-orange-500/10 text-orange-400 border-orange-500/30' },
-  unverified: { label: 'Unverified', dot: 'bg-red-400',     className: 'bg-red-500/10 text-red-400 border-red-500/30' },
+type T = 'live'|'scheduled'|'estimated'|'demo'|'unverified';
+interface Props { type: T; className?: string; }
+const cfg: Record<T,{label:string;cls:string}> = {
+  live:       {label:'Live',       cls:'bg-emerald-50 text-emerald-700 border-emerald-200'},
+  scheduled:  {label:'Scheduled',  cls:'bg-blue-50 text-blue-700 border-blue-200'},
+  estimated:  {label:'Estimated',  cls:'bg-yellow-50 text-yellow-700 border-yellow-200'},
+  demo:       {label:'Demo Data',  cls:'bg-orange-50 text-orange-700 border-orange-200'},
+  unverified: {label:'Unverified', cls:'bg-red-50 text-red-700 border-red-200'},
 };
-
-export function SourceBadge({ type, className = '' }: SourceBadgeProps) {
-  const { label, dot, className: badgeClass } = config[type];
-  return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${badgeClass} ${className}`}>
-      <span className={`w-1.5 h-1.5 rounded-full ${dot} ${type === 'live' ? 'animate-pulse' : ''}`} />
-      {label}
-    </span>
-  );
+export function SourceBadge({ type, className='' }: Props) {
+  const {label,cls} = cfg[type];
+  return <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold ${cls} ${className}`}>
+    <span className="w-1.5 h-1.5 rounded-full bg-current" />{label}
+  </span>;
 }

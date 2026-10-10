@@ -1,35 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDb } from '@/lib/db';
 import { CommuteRequest } from '@/lib/types';
-import { runTravelAgent } from '@/lib/agent';
+import { planJourney } from '@/lib/planner';
 import { randomUUID } from 'crypto';
+
+// In-memory plan store — shared within the same Next.js server process
+const planStore = new Map<string, any>();
+// Export so stream route can access it
+(globalThis as any).__planStore = (globalThis as any).__planStore || new Map();
+const store: Map<string, any> = (globalThis as any).__planStore;
 
 export async function POST(req: NextRequest) {
   try {
     const body: CommuteRequest = await req.json();
-    const db = getDb();
     const id = randomUUID();
 
-    db.prepare('INSERT INTO plans (id, request_json, status) VALUES (?,?,?)').run(id, JSON.stringify(body), 'pending');
+    // Run planner synchronously — no background async
+    const plan = await planJourney(body, id);
+    plan.id = id;
 
-    // Run agent async, store result
-    (async () => {
-      const events: any[] = [];
-      const emit = (e: any) => events.push(e);
-      try {
-        const plan = await runTravelAgent(body, id, emit);
-        db.prepare('UPDATE plans SET plan_json=?, status=? WHERE id=?').run(JSON.stringify(plan), 'ready', id);
-        db.prepare('INSERT INTO plan_versions (plan_id, version, plan_json, trigger) VALUES (?,?,?,?)').run(id, 1, JSON.stringify(plan), 'initial');
-      } catch (err: any) {
-        db.prepare("UPDATE plans SET status='error' WHERE id=?").run(id);
-      }
-      // Store agent run events
-      const runId = events.find(e => e.agentRunId)?.agentRunId ?? `run_${id}`;
-      db.prepare('INSERT OR IGNORE INTO agent_runs (id, plan_id, events_json, status) VALUES (?,?,?,?)').run(runId, id, JSON.stringify(events), 'completed');
-    })();
+    // Store in globalThis so stream route can access same memory
+    store.set(id, { status: 'ready', plan });
 
     return NextResponse.json({ id });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Planning failed';
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
+}
+
+export async function GET() {
+  const plans = Array.from(store.entries()).map(([id, v]) => ({ id, status: v.status }));
+  return NextResponse.json({ plans });
 }
