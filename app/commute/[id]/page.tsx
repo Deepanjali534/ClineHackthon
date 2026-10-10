@@ -27,26 +27,14 @@ export default function PlanPage() {
 
   useEffect(() => {
     if (isDemo) return;
-    let cancelled = false;
-    const poll = async () => {
-      for (let i = 0; i < 60; i++) {
-        if (cancelled) return;
-        try {
-          const res = await fetch(`/api/plan/${id}`);
-          if (!res.ok) { setError('Plan not found'); setLoading(false); return; }
-          const data = await res.json();
-          const plan = data.plan ?? data;
-          if (plan && plan.id) { setPlan(plan); setLoading(false); return; }
-          // Plan still pending - wait and retry
-          await new Promise(r => setTimeout(r, 1000));
-        } catch (e: any) {
-          setError(e.message); setLoading(false); return;
-        }
-      }
-      setError('Timed out waiting for plan. Please try again.'); setLoading(false);
-    };
-    poll();
-    return () => { cancelled = true; };
+    fetch(`/api/plan/${id}`)
+      .then(async res => {
+        if (!res.ok) throw new Error('Plan not found');
+        const data = await res.json();
+        return data.plan ?? data;
+      })
+      .then(plan => { setPlan(plan); setLoading(false); })
+      .catch(e => { setError(e.message); setLoading(false); });
   }, [id, isDemo]);
 
   if (loading) return <LoadingSpinner message="Loading your journey plan..." />;
