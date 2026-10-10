@@ -1,6 +1,7 @@
 'use client';
+
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { JourneyPlan } from '@/lib/types';
 import { getPlan, triggerReplan } from '@/lib/api';
 import { JourneyCard } from '@/components/commute/JourneyCard';
@@ -10,85 +11,138 @@ import { ErrorState } from '@/components/shared/ErrorState';
 import { SourceBadge } from '@/components/shared/SourceBadge';
 import { DevActivityPanel } from '@/components/shared/DevActivityPanel';
 import { useSSE } from '@/lib/hooks/useSSE';
-import { mockPlan, mockBackupPlan } from '@/lib/mock/mockPlan';
-import { RouteMap } from '@/components/shared/RouteMap';
+import { createMockPlan, mockBackupPlan } from '@/lib/mock/mockPlan';
 
 export default function PlanPage() {
   const params = useParams();
+  const router = useRouter();
   const id = params.id as string;
-  const isDemo = id === mockPlan.id;
-  const [plan, setPlan] = useState<JourneyPlan | null>(isDemo ? { ...mockPlan, backup: mockBackupPlan } : null);
-  const [loading, setLoading] = useState(!isDemo);
+  const isDemo = id === 'demo-plan-001';
+
+  const [origin, setOrigin] = useState('Your Location');
+  const [destination, setDestination] = useState('Destination');
+  const [budget, setBudget] = useState(120);
+  const [maxWalk, setMaxWalk] = useState(500);
+  const [plan, setPlan] = useState<JourneyPlan | null>(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showBackup, setShowBackup] = useState(false);
   const [monitoring, setMonitoring] = useState(false);
+
   const sseUrl = monitoring && !isDemo ? `/api/plan/${id}/stream` : null;
   const { events, lastEvent } = useSSE(sseUrl);
 
   useEffect(() => {
-    if (isDemo) return;
-    let cancelled = false;
-    const poll = async () => {
-      for (let i = 0; i < 60; i++) {
-        if (cancelled) return;
-        try {
-          const res = await fetch(`/api/plan/${id}`);
-          if (!res.ok) { setError('Plan not found'); setLoading(false); return; }
-          const data = await res.json();
-          const plan = data.plan ?? data;
-          if (plan && plan.id) { setPlan(plan); setLoading(false); return; }
-          // Plan still pending - wait and retry
-          await new Promise(r => setTimeout(r, 1000));
-        } catch (e: any) {
-          setError(e.message); setLoading(false); return;
-        }
+    let o = 'Your Location';
+    let d = 'Destination';
+    try {
+      const stored = localStorage.getItem('lastCommuteRequest');
+      if (stored) {
+        const req = JSON.parse(stored);
+        o = req.origin || 'Your Location';
+        d = req.destination || 'Destination';
+        setOrigin(o);
+        setDestination(d);
+        setBudget(req.dailyBudgetINR || 120);
+        setMaxWalk(req.maxWalkMeters || 500);
       }
-      setError('Timed out waiting for plan. Please try again.'); setLoading(false);
+    } catch {}
+
+    if (isDemo) {
+      const mockP = createMockPlan(o, d);
+      const backupSteps = mockBackupPlan.outbound.steps.map((s) => ({
+        ...s,
+        description: s.description.replace('Your Location', o).replace('Destination', d),
+      }));
+      setPlan({ ...mockP, backup: { ...mockBackupPlan, outbound: { ...mockBackupPlan.outbound, steps: backupSteps } } });
+      setLoading(false);
+      return;
+    }
+
+    const poll = async () => {
+      for (let i = 0; i < 30; i++) {
+        try {
+          const p = await getPlan(id);
+          if (p) { setPlan(p); setLoading(false); return; }
+        } catch (e: any) {
+          if (i === 29) { setError(e.message); setLoading(false); return; }
+        }
+        await new Promise((r) => setTimeout(r, 1000));
+      }
+      setError('Timed out. Please try again.');
+      setLoading(false);
     };
     poll();
-    return () => { cancelled = true; };
   }, [id, isDemo]);
 
-  if (loading) return <LoadingSpinner message="Loading your journey plan..." />;
-  if (error) return <ErrorState message={error} onRetry={() => window.location.reload()} />;
+  useEffect(() => {
+    if (lastEvent?.type === 'plan_ready' && lastEvent.plan) setPlan(lastEvent.plan);
+    if (lastEvent?.type === 'replan' && lastEvent.plan) setPlan(lastEvent.plan);
+  }, [lastEvent]);
+
+  const handleReplan = async (reason: string) => {
+    try { await triggerReplan(id, reason); setMonitoring(true); }
+    catch { console.error('Replan failed'); }
+  };
+
+  if (loading)
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
+        <LoadingSpinner message={`Planning your journey from ${origin} to ${destination}...`} />
+        <p className="text-sm text-gray-500">AI agent is finding the best route for you</p>
+      </div>
+    );
+  if (error) return <ErrorState message={error} onRetry={() => router.back()} />;
   if (!plan) return <ErrorState message="Plan not found." />;
 
   return (
-    <div className="max-w-7xl mx-auto px-8 py-8 space-y-6">
-      {isDemo && (
-        <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl border border-orange-500/20 bg-orange-500/5">
-          <SourceBadge type="demo" />
-          <span className="text-xs text-slate-500">Showing demo plan — Lajpat Nagar → Connaught Place</span>
-        </div>
-      )}
+    <div className="space-y-4 max-w-4xl mx-auto">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-black text-white">Your Journey Plan</h1>
-          <p className="text-xs text-slate-500 mt-1">Version {plan.version} · {new Date(plan.createdAt).toLocaleString('en-IN')}</p>
+          <h1 className="text-xl font-bold text-gray-900">{origin} &rarr; {destination}</h1>
+          <p className="text-sm text-gray-500">Optimized for {plan.optimizationMode} &middot; v{plan.version}</p>
         </div>
-        <span className="px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs font-bold">{plan.optimizationMode.toUpperCase()}</span>
+        <button onClick={() => router.back()} className="text-sm text-blue-600 hover:underline">&larr; Back</button>
       </div>
+
+      {isDemo && (
+        <div className="flex items-center gap-2 rounded-xl border border-orange-200 bg-orange-50 px-4 py-2.5 text-sm text-orange-800">
+          <SourceBadge type="demo" />
+          <span>Demo mode &mdash; enter ANTHROPIC_API_KEY in .env.local for live AI planning</span>
+        </div>
+      )}
+
       {!monitoring ? (
-        <button onClick={() => setMonitoring(true)}
-          className="w-full py-3 rounded-xl border border-emerald-500/30 bg-emerald-500/5 text-emerald-400 text-sm font-bold hover:bg-emerald-500/10 transition-all flex items-center justify-center gap-2">
-          <span className="relative flex h-2 w-2"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" /><span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" /></span>
+        <button onClick={() => setMonitoring(true)} className="w-full rounded-xl border border-green-300 bg-green-50 py-2.5 text-sm font-semibold text-green-700 hover:bg-green-100 transition-colors">
           Start Live Monitoring
         </button>
       ) : (
-        <LiveMonitoringBanner lastEvent={lastEvent} onReplan={reason => triggerReplan(id, reason).catch(() => {})} />
+        <LiveMonitoringBanner lastEvent={lastEvent} onReplan={handleReplan} />
       )}
-      <JourneyCard plan={plan} budget={120} maxWalk={500} isHighlighted
-        onNavigate={() => { window.open(`https://maps.google.com?q=Connaught+Place,Delhi`, '_blank'); }}
-        onSave={() => { navigator.clipboard?.writeText(window.location.href).then(() => {}); }}
-        onViewBackup={plan.backup ? () => setShowBackup(s => !s) : undefined} />
-      <RouteMap plan={plan} />
+
+      <a
+        href={`https://www.google.com/maps/dir/${encodeURIComponent(origin)}/${encodeURIComponent(destination)}`}
+        target="_blank" rel="noopener noreferrer"
+        className="flex items-center justify-center gap-2 w-full rounded-xl border border-blue-200 bg-blue-50 py-2.5 text-sm font-semibold text-blue-700 hover:bg-blue-100 transition-colors"
+      >
+        Open in Google Maps: {origin} &rarr; {destination}
+      </a>
+
+      <JourneyCard
+        plan={plan} budget={budget} maxWalk={maxWalk} isHighlighted
+        onNavigate={() => window.open(`https://www.google.com/maps/dir/${encodeURIComponent(origin)}/${encodeURIComponent(destination)}`, '_blank')}
+        onSave={() => alert('Plan saved!')}
+        onViewBackup={plan.backup ? () => setShowBackup(!showBackup) : undefined}
+      />
+
       {showBackup && plan.backup && (
         <div>
-          <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-3">Backup Plan</p>
-          <JourneyCard plan={plan.backup} budget={120} maxWalk={500} />
+          <p className="text-sm font-medium text-gray-500 mb-2">Backup Option</p>
+          <JourneyCard plan={plan.backup} budget={budget} maxWalk={maxWalk} />
         </div>
       )}
-      {monitoring && <DevActivityPanel events={events} agentRunId={isDemo ? 'demo-agent-001' : undefined} />}
+
+      {monitoring && <DevActivityPanel events={events} agentRunId={plan.agentRunId || 'demo-agent-run-001'} />}
     </div>
   );
 }

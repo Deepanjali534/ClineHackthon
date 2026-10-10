@@ -10,11 +10,12 @@ export type SSEEmitter = (event: SSEEvent) => void;
 
 // ─── Tool Handlers ───────────────────────────────────────────────
 async function tool_get_route_options(args: { from: string; to: string; afterTime: string }) {
-  const fromArea = args.from.toLowerCase().includes('lajpat') ? 'lajpat' : 'cp';
-  const toArea = args.to.toLowerCase().includes('cp') || args.to.toLowerCase().includes('connaught') ? 'cp' : 'lajpat';
+  // Use geocoding to detect area dynamically
+  const fromArea = args.from.toLowerCase().includes('lajpat') || args.from.toLowerCase().includes('south') ? 'lajpat' : 'cp';
+  const toArea = args.to.toLowerCase().includes('cp') || args.to.toLowerCase().includes('connaught') || args.to.toLowerCase().includes('central') ? 'cp' : 'lajpat';
   const cancelled = getCancelledTrips();
   const options = getRouteOptions(fromArea as any, toArea as any, args.afterTime, cancelled);
-  return { options, cancelledCount: cancelled.length, sourceType: 'scheduled' };
+  return { options, cancelledCount: cancelled.length, sourceType: 'demo' };
 }
 
 async function tool_get_transport_schedule(args: { routeId: string }) {
@@ -24,7 +25,7 @@ async function tool_get_transport_schedule(args: { routeId: string }) {
     FROM trips t JOIN stop_times st ON st.trip_id = t.id JOIN stops s ON s.id = st.stop_id
     WHERE t.route_id = ? ORDER BY t.id, st.sequence
   `).all(args.routeId);
-  return { schedule: trips, sourceType: 'scheduled' };
+  return { schedule: trips, sourceType: 'demo' };
 }
 
 async function tool_get_weather(args: { lat?: number; lng?: number }) {
@@ -103,7 +104,7 @@ async function runWithClaude(req: CommuteRequest, planId: string, runId: string,
   ];
 
   const systemPrompt = `You are a Delhi travel planning agent. Plan the optimal commute for the user using the available tools. 
-User request: From Lajpat Nagar to Connaught Place.
+User request: From ${req.origin} to ${req.destination}.
 Deadline: ${req.arrivalDeadline}, Return after: ${req.returnReadyTime}, Budget: \u20b9${req.dailyBudgetINR}, Max walk: ${req.maxWalkMeters}m, Mode: ${req.optimizationMode}.
 Use tools in order: get_service_notices \u2192 get_route_options (outbound) \u2192 get_route_options (return) \u2192 get_weather \u2192 evaluate_journeys \u2192 submit_travel_plan.
 All data is demo/scheduled data for hackathon purposes.`;
