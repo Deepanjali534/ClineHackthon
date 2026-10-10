@@ -21,7 +21,6 @@ Built by **Team Chitosan** for the **Cline AI Builder Hackathon — Round 2**.
 - [Getting Started](#getting-started)
 - [Environment Variables](#environment-variables)
 - [API Overview](#api-overview)
-- [Project Limitations](#project-limitations)
 - [Roadmap](#roadmap)
 - [Team](#team)
 - [References](#references)
@@ -295,7 +294,6 @@ Get a free API key at https://console.anthropic.com
 npm run dev
 ```
 
-Open http://localhost:3000
 
 ### 5. Build for production
 
@@ -314,14 +312,6 @@ npm start
 | `NEXT_PUBLIC_APP_NAME` | Optional | App display name |
 
 ---
-
-## Project Limitations
-
-- **Limited transport coverage:** prototype covers Delhi corridor with 16+ areas; not all Indian cities
-- **No live transit feed:** schedules are seeded demo data, not real-time GPS tracking
-- **In-memory storage:** data resets on server restart (sufficient for hackathon demo)
-- **Notice approval required:** extracted notices remain pending until an admin approves them
-- **Prototype scope:** no UPI payments, no live GTFS-RT, no voice input (roadmap items)
 
 ## Roadmap
 
@@ -348,7 +338,6 @@ npm start
 **Team Chitosan**Built for the **Cline AI Builder Hackathon — Round 2**.
 
 - **Deepanjali** — Frontend (branch: `deepanjali/main-dev`)
-- **Teammate** — Backend (branch: `friend/main-dev`)
 
 ## References
 
