@@ -5,6 +5,7 @@ export const mockTrip: TripPlan = {
   destination: 'Jaipur',
   totalCostINR: 3600,
   optimizationMode: 'balanced',
+  createdAt: new Date().toISOString(),
   explanation:
     'A well-balanced 3-day Jaipur itinerary covering major monuments, local food, and cultural spots. Transport costs minimised by clustering nearby attractions per day.',
   days: [

@@ -51,15 +51,18 @@ export interface JourneyPlan {
   backup?: JourneyPlan;
   version: number;
   createdAt: string;
+  agentRunId?: string;
+  notices?: ServiceNotice[];
 }
 
 export interface SSEEvent {
-  type: 'tool_start' | 'tool_end' | 'plan_ready' | 'alert' | 'replan' | 'error';
+  type: 'tool_start' | 'tool_end' | 'plan_ready' | 'alert' | 'replan' | 'error' | 'progress';
   toolName?: string;
   durationMs?: number;
   message?: string;
   plan?: JourneyPlan;
   agentRunId?: string;
+  data?: unknown;
 }
 
 export interface ServiceNotice {
@@ -87,18 +90,20 @@ export interface TripRequest {
   optimizationMode: OptimizationMode;
 }
 
+export interface TripSlot {
+  time: 'morning' | 'afternoon' | 'evening';
+  place: string;
+  type: 'monument' | 'restaurant' | 'activity' | 'transport' | 'hotel';
+  durationMins: number;
+  estimatedCostINR: number;
+  transport?: string;
+  notes?: string;
+}
+
 export interface TripDay {
   day: number;
   date: string;
-  slots: {
-    time: 'morning' | 'afternoon' | 'evening';
-    place: string;
-    type: 'monument' | 'restaurant' | 'activity' | 'transport' | 'hotel';
-    durationMins: number;
-    estimatedCostINR: number;
-    transport?: string;
-    notes?: string;
-  }[];
+  slots: TripSlot[];
   weatherSummary: string;
   dayTotalCostINR: number;
 }
@@ -110,4 +115,69 @@ export interface TripPlan {
   totalCostINR: number;
   optimizationMode: OptimizationMode;
   explanation: string;
+  createdAt: string;
+}
+
+// DB row types
+export interface Stop {
+  id: string;
+  name: string;
+  lat: number;
+  lng: number;
+}
+
+export interface Route {
+  id: string;
+  name: string;
+  operator: string;
+  mode: 'bus' | 'metro' | 'auto';
+}
+
+export interface StopTime {
+  trip_id: string;
+  stop_id: string;
+  arrival: string;
+  departure: string;
+  sequence: number;
+}
+
+export interface Fare {
+  route_id: string;
+  from_stop: string;
+  to_stop: string;
+  amount_inr: number;
+}
+
+export interface WeatherData {
+  temperature: number;
+  precipitationMm: number;
+  windSpeedKmh: number;
+  description: string;
+  isRaining: boolean;
+}
+
+export interface RouteOption {
+  id: string;
+  tripId: string;
+  routeId: string;
+  routeName: string;
+  mode: string;
+  fromStop: string;
+  toStop: string;
+  departureTime: string;
+  arrivalTime: string;
+  durationMins: number;
+  fareINR: number;
+  walkToStopMeters: number;
+  walkFromStopMeters: number;
+  transfers: number;
+  sourceType: 'scheduled' | 'live' | 'estimated' | 'demo';
+}
+
+export interface OptimizationWeights {
+  cost: number;
+  time: number;
+  walk: number;
+  transfers: number;
+  comfort: number;
 }
