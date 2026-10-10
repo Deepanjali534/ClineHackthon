@@ -22,7 +22,6 @@ Built by **Team Chitosan** for the **Cline AI Builder Hackathon — Round 2**.
 - [Environment Variables](#environment-variables)
 - [API Overview](#api-overview)
 - [Roadmap](#roadmap)
-- [Team](#team)
 - [References](#references)
 
 ---
