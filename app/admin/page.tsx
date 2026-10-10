@@ -26,7 +26,7 @@ export default function AdminPage() {
           }} />
         ) : (
           <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] flex items-center justify-center p-12">
-            <p className="text-sm text-slate-600 text-center">Submit a notice on the left &#8594;<br />AI extracted draft appears here</p>
+            <p className="text-sm text-slate-600 text-center">Submit a notice on the left →<br />AI extracted draft appears here</p>
           </div>
         )}
       </div>

@@ -8,16 +8,16 @@ export function InterpretedRequirements({ interpreted, onConfirm, onEdit }: Prop
     { key: 'destination', label: 'To', confident: !!interpreted.destination },
     { key: 'arrivalDeadline', label: 'Arrive by', confident: !!interpreted.arrivalDeadline },
     { key: 'returnReadyTime', label: 'Return after', confident: !!interpreted.returnReadyTime },
-    { key: 'dailyBudgetINR', label: 'Budget (&#8377;)', confident: !!interpreted.dailyBudgetINR },
+    { key: 'dailyBudgetINR', label: 'Budget (₹)', confident: !!interpreted.dailyBudgetINR },
     { key: 'maxWalkMeters', label: 'Max walk', confident: !!interpreted.maxWalkMeters },
   ];
   return (
     <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 p-4 space-y-3">
-      <p className="text-xs font-bold text-blue-400 uppercase tracking-widest">&#129302; Interpreted as:</p>
+      <p className="text-xs font-bold text-blue-400 uppercase tracking-widest">🤖 Interpreted as:</p>
       <div className="space-y-2">
         {fields.map(f => (
           <div key={f.key as string} className="flex items-center gap-2">
-            <span className={`text-xs ${f.confident ? 'text-emerald-400' : 'text-yellow-400'}`}>{f.confident ? '&#10003;' : '&#9888;'}</span>
+            <span className={`text-xs ${f.confident ? 'text-emerald-400' : 'text-yellow-400'}`}>{f.confident ? '✓' : '&#9888;'}</span>
             <span className="text-xs text-slate-500 w-24">{f.label}:</span>
             <input className={inputCls} defaultValue={interpreted[f.key] !== undefined ? String(interpreted[f.key]) : ''}
               onBlur={e => onEdit(f.key, e.target.value)} />

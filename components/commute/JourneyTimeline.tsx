@@ -9,13 +9,13 @@ export function JourneyTimeline({ leg, label, emoji }: Props) {
           <span>{emoji}</span>
           <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest">{label}</span>
         </div>
-        <span className="text-sm font-bold text-white">{leg.departureTime} &#8594; {leg.arrivalTime}</span>
+        <span className="text-sm font-bold text-white">{leg.departureTime} → {leg.arrivalTime}</span>
       </div>
       <div className="border-l-2 border-blue-500/20 ml-1.5 space-y-0">
         {leg.steps.map((step, i) => <StepCard key={i} step={step} />)}
       </div>
       <div className="flex gap-3 mt-3 pt-3 border-t border-white/5">
-        <span className="text-xs text-emerald-400 font-semibold">&#8377;{leg.costINR}</span>
+        <span className="text-xs text-emerald-400 font-semibold">₹{leg.costINR}</span>
         <span className="text-xs text-slate-500">{leg.walkMeters}m walk</span>
       </div>
     </div>

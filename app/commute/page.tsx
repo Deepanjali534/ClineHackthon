@@ -11,9 +11,9 @@ export default function CommutePage() {
   const [loading, setLoading] = useState(false);
   return (
     <div className="max-w-7xl mx-auto px-8 py-8">
-      <div className="grid grid-cols-12 gap-8">
+      <div className="grid grid-cols-12 gap-6">
         {/* Left: Form */}
-        <div className="col-span-5 space-y-4">
+        <div className="col-span-5 space-y-4 min-w-0">
           <div className="flex items-center gap-2 mb-2">
             <SourceBadge type="demo" />
             <span className="text-xs text-slate-500">Backend not connected — using demo data</span>
@@ -26,7 +26,7 @@ export default function CommutePage() {
           }} />
         </div>
         {/* Right: Info panel */}
-        <div className="col-span-7 space-y-5">
+        <div className="col-span-7 space-y-5 min-w-0">
           <div className="rounded-2xl border border-[#1e3a5f] bg-[#0d1526] p-6">
             <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-4">How It Works</p>
             <div className="space-y-4">
@@ -43,12 +43,12 @@ export default function CommutePage() {
           <div className="rounded-2xl border border-[#1e3a5f] bg-[#0d1526] p-6">
             <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-4">Quick Demo</p>
             <div className="space-y-2">
-              <div className="flex justify-between text-sm"><span className="text-slate-400">Route</span><span className="text-white font-medium">Lajpat Nagar &#8594; CP</span></div>
-              <div className="flex justify-between text-sm"><span className="text-slate-400">Bus 615</span><span className="text-emerald-400 font-medium">On Time &#10003;</span></div>
+              <div className="flex justify-between text-sm"><span className="text-slate-400">Route</span><span className="text-white font-medium">Lajpat Nagar → CP</span></div>
+              <div className="flex justify-between text-sm"><span className="text-slate-400">Bus 615</span><span className="text-emerald-400 font-medium">On Time ✓</span></div>
               <div className="flex justify-between text-sm"><span className="text-slate-400">Depart</span><span className="text-white font-medium">08:00</span></div>
               <div className="flex justify-between text-sm"><span className="text-slate-400">Arrive</span><span className="text-white font-medium">08:52 (8 min early)</span></div>
-              <div className="flex justify-between text-sm"><span className="text-slate-400">Fare</span><span className="text-white font-medium">&#8377;30</span></div>
-              <div className="flex justify-between text-sm"><span className="text-slate-400">Weather</span><span className="text-yellow-400">&#9728;&#65039; Clear 28&#176;C</span></div>
+              <div className="flex justify-between text-sm"><span className="text-slate-400">Fare</span><span className="text-white font-medium">₹30</span></div>
+              <div className="flex justify-between text-sm"><span className="text-slate-400">Weather</span><span className="text-yellow-400">☀️ Clear 28°C</span></div>
             </div>
           </div>
           <div className="rounded-2xl border border-cyan-500/20 bg-cyan-500/5 p-4 flex items-center gap-3">

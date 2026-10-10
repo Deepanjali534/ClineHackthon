@@ -15,18 +15,18 @@ export function OptimizationPicker({ value, onChange }: Props) {
   return (
     <div>
       <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-3">Optimization Mode</p>
-      <div className="grid grid-cols-5 gap-2">
+      <div className="flex gap-2 overflow-x-auto pb-1">
         {modes.map(m => {
           const sel = value === m.id;
           return (
             <button key={m.id} type="button" onClick={() => onChange(m.id)}
-              className={`relative flex flex-col items-center p-4 rounded-2xl border-2 transition-all duration-200 cursor-pointer hover:-translate-y-0.5 ${
+              className={`relative flex flex-col items-center p-4 rounded-2xl border-2 transition-all duration-200 cursor-pointer hover:-translate-y-0.5 min-w-[100px] flex-1 ${
                 sel
                   ? `bg-gradient-to-br ${m.selCls} shadow-lg`
                   : 'bg-[#0d1526] border-[#1e3a5f] hover:border-slate-500/50 hover:bg-[#0d1a2e]'
               }`}>
               {sel && (
-                <span className="absolute top-2 right-2 w-4 h-4 rounded-full bg-white/20 flex items-center justify-center text-[10px] text-white">&#10003;</span>
+                <span className="absolute top-2 right-2 w-4 h-4 rounded-full bg-white/20 flex items-center justify-center text-[10px] text-white">✓</span>
               )}
               <span className="text-2xl mb-2">{m.icon}</span>
               <span className={`text-[10px] font-bold tracking-wider ${sel ? 'text-white' : 'text-slate-400'}`}>{m.label}</span>

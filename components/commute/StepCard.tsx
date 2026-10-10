@@ -19,7 +19,7 @@ export function StepCard({ step }: Props) {
           <span className="text-xs text-slate-500">{step.durationMins} min</span>
           {step.distanceMeters && <span className="text-xs text-slate-500">{step.distanceMeters}m</span>}
           {step.costINR != null && step.costINR > 0 && (
-            <span className="text-xs font-bold text-emerald-400">&#8377;{step.costINR}</span>
+            <span className="text-xs font-bold text-emerald-400">₹{step.costINR}</span>
           )}
           <SourceBadge type={step.sourceType} />
         </div>

@@ -39,7 +39,7 @@ export default function PlanPage() {
       {isDemo && (
         <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl border border-orange-500/20 bg-orange-500/5">
           <SourceBadge type="demo" />
-          <span className="text-xs text-slate-500">Showing demo plan — Lajpat Nagar &#8594; Connaught Place</span>
+          <span className="text-xs text-slate-500">Showing demo plan — Lajpat Nagar → Connaught Place</span>
         </div>
       )}
       <div className="flex items-center justify-between">
@@ -59,7 +59,7 @@ export default function PlanPage() {
         <LiveMonitoringBanner lastEvent={lastEvent} onReplan={reason => triggerReplan(id, reason).catch(() => {})} />
       )}
       <JourneyCard plan={plan} budget={120} maxWalk={500} isHighlighted
-        onNavigate={() => alert('Navigation — backend integration pending')}
+        onNavigate={() => alert('Navigation - backend integration pending')}
         onSave={() => alert('Saved!')}
         onViewBackup={plan.backup ? () => setShowBackup(s => !s) : undefined} />
       <RouteMap plan={plan} />

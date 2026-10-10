@@ -24,7 +24,7 @@ export function NoticeForm({ onSubmitted }: Props) {
       <button onClick={() => setText(EXAMPLE)} className="text-xs text-blue-400 hover:text-blue-300 transition-colors">Use example notice</button>
       <button onClick={handle} disabled={loading}
         className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-sm font-bold hover:shadow-[0_0_20px_rgba(139,92,246,0.4)] transition-all disabled:opacity-50">
-        {loading ? 'Extracting...' : '&#129302; Extract with AI'}
+        {loading ? 'Extracting...' : '🤖 Extract with AI'}
       </button>
     </div>
   );

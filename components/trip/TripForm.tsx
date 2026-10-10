@@ -40,9 +40,9 @@ export function TripForm({ onSubmit, isLoading }: Props) {
           <div><label className={labelCls}>End Date</label><input type="date" className={inputCls} value={endDate} onChange={e => setEndDate(e.target.value)} /></div>
         </div>
         <div>
-          <div className="flex justify-between mb-1.5"><label className={labelCls}>Total Budget</label><span className="text-xs font-black text-white">&#8377;{budget.toLocaleString()}</span></div>
+          <div className="flex justify-between mb-1.5"><label className={labelCls}>Total Budget</label><span className="text-xs font-black text-white">₹{budget.toLocaleString()}</span></div>
           <input type="range" min={1000} max={50000} step={500} value={budget} onChange={e => setBudget(parseInt(e.target.value))} className="w-full accent-blue-500" />
-          <div className="flex justify-between text-xs text-slate-600 mt-1"><span>&#8377;1,000</span><span>&#8377;50,000</span></div>
+          <div className="flex justify-between text-xs text-slate-600 mt-1"><span>₹1,000</span><span>₹50,000</span></div>
         </div>
         <div>
           <label className={labelCls}>Interests</label>

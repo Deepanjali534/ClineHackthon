@@ -31,13 +31,13 @@ export function JourneyCard({ plan, budget, maxWalk, isHighlighted, onNavigate, 
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            {isHighlighted && <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold">&#10003; RECOMMENDED</span>}
+            {isHighlighted && <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold">✓ RECOMMENDED</span>}
             <span className={`px-2.5 py-1 rounded-full border text-xs font-bold ${modeBadge[plan.optimizationMode]}`}>
               {modeLabel[plan.optimizationMode]}
             </span>
           </div>
           <div className="text-right">
-            <div className="text-2xl font-black text-white">&#8377;{plan.totalCostINR}</div>
+            <div className="text-2xl font-black text-white">₹{plan.totalCostINR}</div>
             <div className="text-xs text-slate-500">Score: {plan.optimizationScore}/100</div>
           </div>
         </div>
@@ -45,19 +45,19 @@ export function JourneyCard({ plan, budget, maxWalk, isHighlighted, onNavigate, 
         {/* Constraint badges */}
         <div className="flex flex-wrap gap-2">
           <span className={`px-2.5 py-1 rounded-full border text-xs font-semibold ${plan.meetsDeadline ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : 'bg-red-500/10 text-red-400 border-red-500/30'}`}>
-            {plan.meetsDeadline ? '&#10003;' : '&#10007;'} Deadline
+            {plan.meetsDeadline ? '✓' : '&#10007;'} Deadline
           </span>
           <span className={`px-2.5 py-1 rounded-full border text-xs font-semibold ${plan.meetsBudget ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : 'bg-red-500/10 text-red-400 border-red-500/30'}`}>
-            {plan.meetsBudget ? '&#10003;' : '&#10007;'} Budget
+            {plan.meetsBudget ? '✓' : '&#10007;'} Budget
           </span>
           <span className={`px-2.5 py-1 rounded-full border text-xs font-semibold ${plan.meetsWalkLimit ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : 'bg-orange-500/10 text-orange-400 border-orange-500/30'}`}>
-            {plan.meetsWalkLimit ? '&#10003;' : '&#9888;'} Walk
+            {plan.meetsWalkLimit ? '✓' : '&#9888;'} Walk
           </span>
         </div>
 
         {/* Two-col legs */}
         <div className="grid grid-cols-2 gap-6">
-          <JourneyTimeline leg={plan.outbound} label="OUTBOUND" emoji="&#127749;" />
+          <JourneyTimeline leg={plan.outbound} label="OUTBOUND" emoji="🌅" />
           <JourneyTimeline leg={plan.returnLeg} label="RETURN" emoji="&#127750;" />
         </div>
 
@@ -73,7 +73,7 @@ export function JourneyCard({ plan, budget, maxWalk, isHighlighted, onNavigate, 
         {/* AI explanation */}
         <div className="border-l-2 border-purple-500/50 pl-4">
           <p className="text-xs text-slate-400 italic">
-            <span className="text-purple-400 font-semibold not-italic">&#129302; Cline: </span>
+            <span className="text-purple-400 font-semibold not-italic">🤖 Cline: </span>
             {plan.explanation}
           </p>
         </div>
@@ -89,7 +89,7 @@ export function JourneyCard({ plan, budget, maxWalk, isHighlighted, onNavigate, 
         <div className="flex gap-3 pt-2">
           {onNavigate && (
             <button onClick={onNavigate} className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 text-white text-sm font-bold hover:shadow-[0_0_20px_rgba(59,130,246,0.4)] transition-all">
-              Navigate &#8594;
+              Navigate →
             </button>
           )}
           {onSave && (

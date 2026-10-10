@@ -18,28 +18,28 @@ export function ItineraryView({ plan }: Props) {
               {plan.days.map(d => (
                 <div key={d.day} className="flex justify-between text-sm">
                   <span className="text-slate-400">Day {d.day}</span>
-                  <span className="font-medium text-white">&#8377;{d.dayTotalCostINR.toLocaleString()}</span>
+                  <span className="font-medium text-white">₹{d.dayTotalCostINR.toLocaleString()}</span>
                 </div>
               ))}
               <div className="border-t border-white/5 pt-2 flex justify-between font-bold">
                 <span className="text-white">Total</span>
-                <span className="text-emerald-400">&#8377;{plan.totalCostINR.toLocaleString()}</span>
+                <span className="text-emerald-400">₹{plan.totalCostINR.toLocaleString()}</span>
               </div>
             </div>
             <div className="h-1.5 rounded-full bg-slate-800"><div className="h-full rounded-full bg-gradient-to-r from-blue-500 to-cyan-400" style={{width:'45%'}} /></div>
             <p className="text-xs text-slate-500 mt-2">45% of budget used</p>
             <button onClick={() => { navigator.clipboard?.writeText(window.location.href); alert('Link copied!'); }}
               className="w-full mt-4 py-2.5 rounded-xl border border-blue-500/30 bg-blue-500/10 text-blue-400 text-xs font-bold hover:bg-blue-500/20 transition-colors">
-              Share Itinerary &#128279;
+              Share Itinerary 🔗
             </button>
           </div>
         </div>
         {/* Main */}
         <div className="col-span-9 space-y-6">
           <div className="rounded-2xl border border-indigo-500/30 bg-indigo-500/5 p-6">
-            <h1 className="text-2xl font-black text-white">&#9992;&#65039; {plan.destination} Itinerary</h1>
-            <p className="text-sm text-slate-400 mt-1">{plan.days.length} days &#183; {plan.optimizationMode} mode &#183; &#8377;{plan.totalCostINR.toLocaleString()} total</p>
-            <p className="text-xs text-indigo-400 mt-3 border-l-2 border-indigo-500/50 pl-3">&#129302; {plan.explanation}</p>
+            <h1 className="text-2xl font-black text-white">✈️ {plan.destination} Itinerary</h1>
+            <p className="text-sm text-slate-400 mt-1">{plan.days.length} days · {plan.optimizationMode} mode · ₹{plan.totalCostINR.toLocaleString()} total</p>
+            <p className="text-xs text-indigo-400 mt-3 border-l-2 border-indigo-500/50 pl-3">🤖 {plan.explanation}</p>
           </div>
           {plan.days.map(day => <DayCard key={day.day} day={day} />)}
         </div>

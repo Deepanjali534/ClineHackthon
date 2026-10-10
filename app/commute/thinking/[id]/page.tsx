@@ -63,7 +63,7 @@ export default function ThinkingPage({ params }: { params: { id: string } }) {
         <div className="absolute inset-0 rounded-full border-2 border-transparent animate-spin" style={{borderTopColor:'#3b82f6',animationDuration:'1.2s'}} />
         <div className="absolute inset-3 rounded-full border-2 border-transparent animate-spin" style={{borderTopColor:'#06b6d4',animationDuration:'1.8s',animationDirection:'reverse'}} />
         <div className="absolute inset-6 rounded-full border-2 border-transparent animate-spin" style={{borderTopColor:'#8b5cf6',animationDuration:'0.9s'}} />
-        <div className="absolute inset-0 flex items-center justify-center text-3xl">&#129302;</div>
+        <div className="absolute inset-0 flex items-center justify-center text-3xl">🤖</div>
       </div>
 
       <h1 className="text-2xl font-black text-white mb-2">Cline is Planning Your Journey</h1>
@@ -86,14 +86,14 @@ export default function ThinkingPage({ params }: { params: { id: string } }) {
           );
           if (isReady && planReady) return (
             <div key={tool} className="flex items-center gap-3 animate-fade-in-up">
-              <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center text-[10px] text-white">&#9733;</div>
+              <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center text-[10px] text-white">★</div>
               <span className="text-sm font-bold text-blue-400">Plan ready! Redirecting...</span>
             </div>
           );
           return (
             <div key={tool} className={`flex items-center gap-3 transition-all ${pending ? 'opacity-30' : ''}`}>
               {done ? (
-                <div className="w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-500/50 flex items-center justify-center text-[10px] text-emerald-400">&#10003;</div>
+                <div className="w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-500/50 flex items-center justify-center text-[10px] text-emerald-400">✓</div>
               ) : active ? (
                 <div className="w-5 h-5 rounded-full border-2 border-blue-500 border-t-transparent animate-spin" />
               ) : (
