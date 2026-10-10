@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDb, initDb } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { runTravelAgent } from '@/lib/agent';
 import { CommuteRequest } from '@/lib/types';
 import { randomUUID } from 'crypto';
@@ -7,7 +7,6 @@ import { randomUUID } from 'crypto';
 export async function POST(req: NextRequest) {
   try {
     const { planId, reason } = await req.json();
-    await initDb();
     const db = getDb();
 
     const planRow = db.prepare('SELECT * FROM plans WHERE id=?').get(planId) as any;

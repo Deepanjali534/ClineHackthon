@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDb, initDb } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { TripRequest, TripPlan, TripDay } from '@/lib/types';
 import { randomUUID } from 'crypto';
 import Anthropic from '@anthropic-ai/sdk';
@@ -7,7 +7,6 @@ import Anthropic from '@anthropic-ai/sdk';
 export async function POST(req: NextRequest) {
   try {
     const body: TripRequest = await req.json();
-    await initDb();
     const db = getDb();
     const id = randomUUID();
 
@@ -32,8 +31,6 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
   const id = req.nextUrl.searchParams.get('id');
   if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
-
-  await initDb();
     const db = getDb();
   // Poll for up to 30s
   for (let i = 0; i < 30; i++) {

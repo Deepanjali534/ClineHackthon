@@ -4,7 +4,7 @@ import { CommuteRequest, JourneyPlan, SSEEvent } from './types';
 import { getRouteOptions, getCancelledTrips } from './transport';
 import { getWeather, getWeatherForJourney } from './weather';
 import { planJourney } from './planner';
-import { getDb, initDb } from './db';
+import { getDb } from './db';
 
 export type SSEEmitter = (event: SSEEvent) => void;
 

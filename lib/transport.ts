@@ -1,5 +1,5 @@
 // Transport adapter — queries SQLite for routes, schedules, fares
-import { getDb, initDb } from './db';
+import { getDb } from './db';
 import { RouteOption } from './types';
 
 function timeToMins(t: string): number {

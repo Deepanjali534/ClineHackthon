@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDb, initDb } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { extractNotice } from '@/lib/noticeExtractor';
 import { randomUUID } from 'crypto';
 
@@ -8,7 +8,6 @@ export async function POST(req: NextRequest) {
     const { rawText } = await req.json();
     if (!rawText) return NextResponse.json({ error: 'rawText required' }, { status: 400 });
 
-    await initDb();
     const db = getDb();
     const id = randomUUID();
     const uploadDate = new Date().toISOString().split('T')[0];
@@ -27,7 +26,6 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET() {
-  await initDb();
     const db = getDb();
   const notices = db.prepare('SELECT * FROM notices ORDER BY created_at DESC LIMIT 50').all() as any[];
   return NextResponse.json(notices.map(n => ({

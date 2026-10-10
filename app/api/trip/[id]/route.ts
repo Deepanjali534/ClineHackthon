@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDb, initDb } from '@/lib/db';
+import { getDb } from '@/lib/db';
 
 export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
-  await initDb();
     const db = getDb();
   // Poll up to 30s for the trip plan to be ready
   for (let i = 0; i < 30; i++) {

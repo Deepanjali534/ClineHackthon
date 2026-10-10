@@ -1,10 +1,9 @@
 import { NextRequest } from 'next/server';
-import { getDb, initDb } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { runTravelAgent, SSEEmitter } from '@/lib/agent';
 import { CommuteRequest } from '@/lib/types';
 
 export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
-  await initDb();
     const db = getDb();
   const planRow = db.prepare('SELECT * FROM plans WHERE id=?').get(params.id) as any;
   if (!planRow) {

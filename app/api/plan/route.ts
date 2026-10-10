@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDb, initDb } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { CommuteRequest } from '@/lib/types';
 import { runTravelAgent } from '@/lib/agent';
 import { randomUUID } from 'crypto';
@@ -7,7 +7,6 @@ import { randomUUID } from 'crypto';
 export async function POST(req: NextRequest) {
   try {
     const body: CommuteRequest = await req.json();
-    await initDb();
     const db = getDb();
     const id = randomUUID();
 
